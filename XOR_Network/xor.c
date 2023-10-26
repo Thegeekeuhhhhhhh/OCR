@@ -4,7 +4,11 @@
 #include <errno.h>
 #include <math.h>
 
-#define HIDDENLAYERNODE = 2
+#define InputLayerNodes 2
+#define HiddenLayerNodes 2
+#define OutputLayerNodes 1
+#define NumberTrainingSequences 4
+#define TrainingEpochs 1000
 
 /*
  For information, the goal of this program is to implement an AI that takes
@@ -26,16 +30,16 @@ AI :
 typedef struct node
 {
 	int bias;
-	float* bows;
+	double* bows;
 	size_t bows_len;
 } node;
 
-float sigmoid(float value)
+double sigmoid(double value)
 {
 /*
  THE necessary function
 */
-	return 1/(1 + expf(value * (-1)));
+	return 1/(1 + exp(value * (-1)));
 }
 
 
@@ -46,12 +50,12 @@ node* create_node(int value, int number_of_weights)
 */
 	node* n = malloc(sizeof(node));
 	n->bias = value;
-	n->bows = malloc(number_of_weights * sizeof(float));
+	n->bows = malloc(number_of_weights * sizeof(double));
 	n->bows_len = number_of_weights;
 	return n;
 }
 
-node* initialize_weights(node* node, float* bows, size_t bows_len)
+node* initialize_weights(node* node, double* bows, size_t bows_len)
 {
 /*
  Set bows values of a node to bows values
@@ -61,7 +65,7 @@ node* initialize_weights(node* node, float* bows, size_t bows_len)
 		errx(1, "Node's bows length is different from bows_len entered as parameter");
 	}
 
-	float* p = node->bows;
+	double* p = node->bows;
 	for (size_t i = 0; i < bows_len; i++)
 	{
 		*(p++) = *(bows++);
@@ -74,16 +78,16 @@ node* initialize_weights_randomly(node* node)
 /*
  Set bows values of a node to random values
 */
-	float* p = node->bows;
+	double* p = node->bows;
 	size_t bows_len = node->bows_len;
 	for (size_t i = 0; i < bows_len; i++)
 	{
-		*(p++) = (float)rand()/RAND_MAX;
+		*(p++) = (double)rand()/RAND_MAX;
 	}
 	return node;
 }
 
-float xor(char* inputs, size_t len)
+double xor(char* inputs, size_t len)
 {
 /*
  Input : Takes a char list as parameter and its length, representing entries,
@@ -97,29 +101,142 @@ float xor(char* inputs, size_t len)
 		errx(1, "Length of inputs array is dangerous");
 		// Dangerous is not even a word representing the danger
 	}
+
+	printf("%c", *inputs);
 	
-
-
-
-
-
-
-
-
-	return 1.0;
+	return 1.0f;
 }
+
+int shuffle(int array[], size_t len)
+{
+/*
+ Shuffles a list of int
+*/
+	for (size_t i = 0; i < (len-1); i++)
+	{
+		size_t j = i + (rand() / (RAND_MAX/(len-i) + 1));
+		int temp = array[i];
+		array[i] = array[j];
+		array[j] = array[i];
+	}
+
+	return 0;
+}
+
+//#define InputLayerNodes = 2
+//#define HiddenLayerNodes = 2
+//#define OutputLayerNodes = 1
+//#define NumberTrainingSequences = 4
+//#define TrainingEpochs = 1000
 
 int main()
 {
-	//printf("exp(0) == %lf\n", exp(0));
-	//printf("%s\n", "Quoicoubehhhh");
-	node* n = create_node(1, 2); // Initialize a node with value 1, containing 2 bows to next neurons
-	initialize_weights_randomly(n);
-	for(int i = 0; n->bows[i]; i++)
+	// lr = learning rate
+	double lr = 1.0f;
+	// Initialization of neuron layers
+	// define InputLayer is useless because we already know it
+
+	// Output layer will always be the same, depending of the last hidden layer
+	double outputLayer[OutputLayerNodes];
+	double outputLayerBias[OutputLayerNodes];
+	double outputWeights[HiddenLayerNodes][OutputLayerNodes];	
+
+	// To go further :
+	// While implementing character recognition, there won't be only 1 hidden layer, but 2-3
+	// SO, arguments will change according to the position of the layer in the network
+	// If we are treating the first hidden layer, it will receive arguments from the input layer
+	// Whereas the last hidden layer will send arguments to the final layer, the output layer
+	
+	// We consider that the actual hidden layer is the one between the input and the output layer
+	double hiddenLayer[HiddenLayerNodes];
+	double hiddenLayerBias[HiddenLayerNodes];
+	double hiddenWeights[InputLayerNodes][HiddenLayerNodes];
+
+	// Initialization of Training data set
+	// For data sets made of images, we'll see later
+	double TrainingInputs[NumberTrainingSequences][InputLayerNodes] = {
+									{0.0f, 0.0f},
+									{0.0f, 1.0f},
+									{1.0f, 0.0f},
+									{1.0f, 1.0f}
+									};
+	double TrainingOutputs[NumberTrainingSequences][OutputLayerNodes] = {
+									{0.0f},
+									{1.0f},
+									{1.0f},
+									{0.0f}
+									};
+
+	// The data set index will be used to get a random list of indexes, thanks to this, the machine will always learn in a different way
+	int DataSetIndex[NumberTrainingSequences];
+	for (int i = 0; i < NumberTrainingSequences; i++)
 	{
-		printf("%f\n",n->bows[i]);
+		DataSetIndex[i] = i;
 	}
 
+
+	// Now, we will set some weights and some biases to random values (Starting values are random)
+	
+
+	// We need to start learning from random values
+	// We begin to initialize output's layer values
+	for (int i = 0; i < OutputLayerNodes; i++)
+	{
+		outputLayerBias[i] =  ((double)rand()) / ((double)RAND_MAX);
+	}
+	for (int i = 0; i < HiddenLayerNodes; i++)
+	{
+		for (int j = 0; j < OutputLayerNodes; j++)
+		{
+			outputWeights[i][j] = ((double)rand()) / ((double)RAND_MAX);
+		}
+	}
+
+	// Initialization of hidden's layer(s) values
+	// To go further : if there is more than 1 layer, the process will change, according to previous / next hidden layers...
+	for (int i = 0; i < HiddenLayerNodes; i++)
+	{
+		hiddenLayerBias[i] = ((double)rand()) / ((double)RAND_MAX);
+	}
+	for (int i = 0; i < InputLayerNodes; i++)
+	{
+		for (int j = 0; j < HiddenLayerNodes; j++)
+		{
+			hiddenWeights[i][j] = ((double)rand()) / ((double)RAND_MAX);
+		}
+	}
+
+
+	for (int epoch = 0; epoch < TrainingEpochs; epoch++)
+	{
+		shuffle(DataSetIndex, NumberTrainingSequences);
+
+		for (int t = 0; t < NumberTrainingSequences; t++)
+		{
+			int index = DataSetIndex[t];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		}
+	}
 
 
 	return 0;
