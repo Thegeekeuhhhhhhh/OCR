@@ -1,10 +1,24 @@
 # Makefile
+
 CC = gcc
-CFLAGS = -Wall -Wextra
-all:
-	gcc -Wall -Wextra -o xor xor.c -lm
+CPPFLAGS = -MMD
+CFLAGS = -Wall -Wextra -lm
+LDFLAGS = -lm 
+LDLIBS = -lm
+
+EXE = perceptron neuralnetwork matrix
+OBJ = perceptron.o neuralnetwork.o matrix.o
+DEP = perceptron.d neuralnetwork.d matrix.d
+
+all: $(EXE)
+
+$(foreach f, $(EXE), $(eval $(f):))
 
 .PHONY: clean
+
 clean:
-	rm xor
+	${RM} ${OBJ}
+	${RM} ${DEP}
+	${RM} $(EXE)
+
 # END
