@@ -35,6 +35,9 @@ void matrix_scalar_add_in_place(Matrix *m, double scalar);
 Matrix *matrix_scalar_mul(Matrix *m, double scalar);
 void matrix_scalar_mul_in_place(Matrix *m, double scalar);
 
+Matrix *matrix_mul(Matrix *m1, Matrix *m2);
+void matrix_mul_in_place(Matrix *m1, Matrix *m2);
+
 Matrix *matrix_dot_product(Matrix *m1, Matrix *m2);
 Matrix *matrix_transpose(Matrix *m);
 
