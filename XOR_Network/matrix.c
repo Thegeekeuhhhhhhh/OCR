@@ -346,7 +346,7 @@ int matrix_equals(Matrix *m1, Matrix *m2)
 	return 1;
 }
 
-
+/*
 int main()
 {
 	Matrix *test1 = malloc(4*4*sizeof(double));
@@ -359,3 +359,4 @@ int main()
 	matrix_print(matrix_transpose(test1));
 	return 0;
 }
+*/

@@ -33,6 +33,7 @@ void train(Perceptron *p, double inputs[], size_t len, double target)
 	}
 }
 
+/*
 int main()
 {
 	Perceptron *p = malloc(sizeof(Perceptron));
@@ -40,13 +41,14 @@ int main()
 	double inputs[] = {-1.0f, 0.5f};
 	printf("%f\n", guess(p, inputs, (size_t)2));
 
-	/*
+	
 	for (int i = 0; i < 2; i++)
 	{
 		printf("%f\n", p->weights[i]);
 	}
-	*/
+	
 
 
 	return 0;
 }
+*/

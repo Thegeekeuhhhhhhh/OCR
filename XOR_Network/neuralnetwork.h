@@ -7,19 +7,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "matrix.h"
-#include "perceptron.h"
-
 typedef struct NeuralNetwork
 {
 	size_t inputNodes;
 	size_t hiddenNodes;
 	size_t outputNodes;
 
-	Matrix *input_hiddenWeights; // Represents weights between Input layer and hidden layer
-	Matrix *hidden_outputWeights; // Represents weights between hidden layer and output layer
-	Matrix *hidden_biases;
-	Matrix *output_biases;
+	struct Matrix *input_hiddenWeights; // Represents weights between Input layer and hidden layer
+	struct Matrix *hidden_outputWeights; // Represents weights between hidden layer and output layer
+	struct Matrix *hidden_biases;
+	struct Matrix *output_biases;
 
 } NeuralNetwork;
 

@@ -1,24 +1,21 @@
-# Makefile
-
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -lm
-LDFLAGS = -lm 
-LDLIBS = -lm
+CFLAGS = -Wall -Wextra
+LDFLAGS = -lm
 
-EXE = perceptron neuralnetwork matrix
-OBJ = perceptron.o neuralnetwork.o matrix.o
-DEP = perceptron.d neuralnetwork.d matrix.d
+all: neuralnetwork
 
-all: $(EXE)
+neuralnetwork: neuralnetwork.o matrix.o perceptron.o
+	$(CC) $(CFLAGS) -o neuralnetwork neuralnetwork.o matrix.o perceptron.o $(LDFLAGS)
 
-$(foreach f, $(EXE), $(eval $(f):))
+neuralnetwork.o: neuralnetwork.c neuralnetwork.h matrix.h perceptron.h
+	$(CC) $(CFLAGS) -c neuralnetwork.c
 
-.PHONY: clean
+matrix.o: matrix.c matrix.h
+	$(CC) $(CFLAGS) -c matrix.c
+
+perceptron.o: perceptron.c perceptron.h matrix.h
+	$(CC) $(CFLAGS) -c perceptron.c
 
 clean:
-	${RM} ${OBJ}
-	${RM} ${DEP}
-	${RM} $(EXE)
-
-# END
+	rm -f *.o neuralnetwork *.d
