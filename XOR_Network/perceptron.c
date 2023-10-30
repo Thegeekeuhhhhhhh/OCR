@@ -1,10 +1,6 @@
 #include "perceptron.h"
-
-// Activation function ?
-double sigmoid(double value)
-{
-	return 1 / (1 + exp(value * (-1)));
-}
+#include "matrix.h"
+#include "neuralnetwork.h"
 
 void init_perceptron(Perceptron* p, size_t len, double bias)
 {
@@ -24,7 +20,7 @@ double guess(Perceptron *p, double inputs[], size_t len)
 	{
 		result += inputs[i]*p->weights[i];
 	}
-	return sigmoid(result);
+	return 1 / (1 + exp(result * (-1)));
 }
 
 void train(Perceptron *p, double inputs[], size_t len, double target)

@@ -1,3 +1,6 @@
+#ifndef MATRIX_H
+#define MATRIX_H
+
 #pragma once
 
 #include <stdio.h>
@@ -14,7 +17,6 @@ typedef struct Matrix
 } Matrix;
 
 void matrix_init(Matrix *m, size_t row, size_t col);
-void matrix_free(Matrix *m);
 void matrix_free_data(Matrix *m);
 
 void matrix_identity(Matrix *m, size_t size);
@@ -36,6 +38,11 @@ void matrix_scalar_mul_in_place(Matrix *m, double scalar);
 Matrix *matrix_dot_product(Matrix *m1, Matrix *m2);
 Matrix *matrix_transpose(Matrix *m);
 
+Matrix *matrix_apply_function(Matrix *m, double (*f)(double));
+void matrix_apply_function_in_place(Matrix *m, double (*f)(double));
 
 void matrix_print(Matrix *m);
+void separator();
 int matrix_equals(Matrix *m1, Matrix *m2);
+
+#endif

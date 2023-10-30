@@ -1,3 +1,6 @@
+#ifndef PERCEPTRON_H
+#define PERCEPTRON_H
+
 #pragma once
 
 #include <stdlib.h>
@@ -14,3 +17,5 @@ typedef struct
 
 void init_percetron(Perceptron *p, size_t len, double bias);
 double guess(Perceptron *p, double inputs[], size_t len);
+
+#endif
