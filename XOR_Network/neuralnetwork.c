@@ -122,8 +122,8 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     }
 
     // Computes hidden outputs
-    
-    
+
+
     //matrix_print(nn->input_hiddenWeights);
     //separator();
     //matrix_print(inputMatrix);
@@ -152,7 +152,7 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
 
 
 
-    printf("Feed Forward executed !\n");
+    //printf("Feed Forward executed !\n");
 
 
 
@@ -173,27 +173,27 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     // Merge (add) old values of weights between hidden and output layer
     // with the new changes, (corresponds to the gradient)
     // Adjusting weights and biases by infinitesimal values
-    
+
     //printf("Step before add in place\n");
 
     /*
-    matrix_print(gradient);
-    separator();
-    matrix_print(transposed_hidden);
-    separator();
-    matrix_print(nn->hidden_outputWeights);
-    separator();
-    matrix_print(dhidden_outputWeights);
-    separator();
-    matrix_print(nn->output_biases);
-    separator();
-    matrix_print(gradient);
-    separator();
-    */
+       matrix_print(gradient);
+       separator();
+       matrix_print(transposed_hidden);
+       separator();
+       matrix_print(nn->hidden_outputWeights);
+       separator();
+       matrix_print(dhidden_outputWeights);
+       separator();
+       matrix_print(nn->output_biases);
+       separator();
+       matrix_print(gradient);
+       separator();
+       */
 
     matrix_add_in_place(nn->hidden_outputWeights, dhidden_outputWeights);
     matrix_add_in_place(nn->output_biases, gradient);
-    printf("Infinitesimal values applied\n");
+    //printf("Infinitesimal values applied\n");
 
     // THEN, we need to do the same process as for hidden to output layer's weights
 
@@ -232,9 +232,9 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     // Do not forget that this is BACKPROPAGATION
 
 
-
-    printf("Outputs :\n");
-    matrix_print(output);
+    /*
+       printf("Outputs :\n");
+       matrix_print(output);
     //separator();
 
     printf("Wanted :\n");
@@ -244,6 +244,7 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     printf("Errors :\n");
     matrix_print(outputLayer_error);
     //separator();
+    */
 
 
 }
@@ -288,11 +289,11 @@ int main()
     matrix_init(wantedOutputsMatrix, NumberOfOutputs, 1);
 
     // Principal loop (Loop on data n times, with n = epoch)
-    for (size_t b = 0; b < 100; b++)
+    for (size_t b = 0; b < 50000; b++)
     {
         for (size_t a = 0; a < 4; a++)
         {
-
+            //size_t a = rand() % 4;
             for (size_t i = 0; i < wantedOutputsMatrix->row; i++)
             {
                 for (size_t j = 0; j < wantedOutputsMatrix->col; j++)
@@ -306,15 +307,15 @@ int main()
             //array_print(inputs[a], 2);
 
             train(nn, inputs[a], 2, wantedOutputsMatrix);
-            matrix_print(wantedOutputsMatrix);
-            array_print(inputs[a], 2);
-            separator();
+            //matrix_print(wantedOutputsMatrix);
+            //array_print(inputs[a], 2);
+            //separator();
 
 
         }
     }
 
-    double testInput[] = { 0.0f, 0.0f };
+    double testInput[] = { 1.0f, 1.0f };
     matrix_print(feedforward_algo(nn, testInput, 2));
     return 0;
 }
