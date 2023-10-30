@@ -23,7 +23,7 @@ double guess(Perceptron *p, double inputs[], size_t len)
 	return 1 / (1 + exp(result * (-1)));
 }
 
-void train(Perceptron *p, double inputs[], size_t len, double target)
+/*void train(Perceptron *p, double inputs[], size_t len, double target)
 {
 	double g = guess(p, inputs, len);
 	double error = target - g;
@@ -32,6 +32,7 @@ void train(Perceptron *p, double inputs[], size_t len, double target)
 		p->weights[i] += error * inputs[i] * p->lr; // Adjust weights
 	}
 }
+*/
 
 /*
 int main()

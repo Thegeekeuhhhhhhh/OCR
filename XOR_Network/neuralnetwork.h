@@ -18,6 +18,7 @@ typedef struct NeuralNetwork
 	struct Matrix *hidden_biases;
 	struct Matrix *output_biases;
 
+    double lr;
 } NeuralNetwork;
 
 void init_network();

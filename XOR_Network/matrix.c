@@ -1,4 +1,5 @@
 #include "matrix.h"
+#define getName(var) #var
 
 void matrix_init(Matrix *m, size_t row, size_t col)
 {
@@ -58,7 +59,7 @@ Matrix *matrix_add(Matrix *m1, Matrix *m2)
        */
     if (m1->row != m2->row || m1->col != m2->col)
     {
-        errx(1, "Tried to add matrixes with different dimensions [Matrix lib] :\nm1->row = %lu !\nm1->col = %lu !\nm2->row = %lu !\nm2->col = %lu !\n", m1->row, m1->col, m2->row, m2->col);
+        errx(1, "Tried to add matrixes with different dimensions [Matrix lib] :\n%s->row = %lu !\n%s->col = %lu !\n%s->row = %lu !\n%s->col = %lu !\n", getName(m1), m1->row, getName(m1), m1->col, getName(m2), m2->row, getName(m2), m2->col);
     }
     else
     {
@@ -83,7 +84,7 @@ void matrix_add_in_place(Matrix *m1, Matrix *m2)
        */
     if (m1->row != m2->row || m1->col != m2->col)
     {
-        errx(1, "Tried to add matrixes with different dimensions [Matrix lib] :\nm1->row = %lu !\nm1->col = %lu !\nm2->row = %lu !\nm2->col = %lu !\n", m1->row, m1->col, m2->row, m2->col);
+        errx(1, "Tried to add matrixes with different dimensions [Matrix lib] :\n%s->row = %lu !\n%s->col = %lu !\n%s->row = %lu !\n%s->col = %lu !\n", getName(m1), m1->row, getName(m1), m1->col, getName(m2), m2->row, getName(m2), m2->col);
     }
     else
     {
@@ -106,7 +107,7 @@ Matrix *matrix_sub(Matrix *m1, Matrix *m2)
        */
     if (m1->row != m2->row || m1->col != m2->col)
     {
-        errx(1, "Tried to add matrixes with different dimensions [Matrix lib] :\nm1->row = %lu !\nm1->col = %lu !\nm2->row = %lu !\nm2->col = %lu !\n", m1->row, m1->col, m2->row, m2->col);
+        errx(1, "Tried to sub matrixes with different dimensions [Matrix lib] :\n%s->row = %lu !\n%s->col = %lu !\n%s->row = %lu !\n%s->col = %lu !\n", getName(m1), m1->row, getName(m1), m1->col, getName(m2), m2->row, getName(m2), m2->col);
     }
     else
     {
@@ -131,7 +132,7 @@ void matrix_sub_in_place(Matrix *m1, Matrix *m2)
        */
     if (m1->row != m2->row || m1->col != m2->col)
     {
-        errx(1, "Tried to add matrixes with different dimensions [Matrix lib] :\nm1->row = %lu !\nm1->col = %lu !\nm2->row = %lu !\nm2->col = %lu !\n", m1->row, m1->col, m2->row, m2->col);
+        errx(1, "Tried to sub matrixes with different dimensions [Matrix lib] :\n%s->row = %lu !\n%s->col = %lu !\n%s->row = %lu !\n%s->col = %lu !\n", getName(m1), m1->row, getName(m1), m1->col, getName(m2), m2->row, getName(m2), m2->col);
     }
     else
     {
@@ -261,7 +262,7 @@ Matrix *matrix_dot_product(Matrix *m1, Matrix *m2)
        */
     if (m1->col != m2->row)
     {
-        errx(1, "Tried to multiply 2 matrices with unappropriate dimensions [Matrix lib] :\nm1->row = %lu !\nm1->col = %lu !\nm2->row = %lu !\nm2->col = %lu !\n", m1->row, m1->col, m2->row, m2->col);
+        errx(1, "Tried to multiply 2 matrices with unappropriate dimensions [Matrix lib] :\n%s->row = %lu !\n%s->col = %lu !\n%s->row = %lu !\n%s->col = %lu !\n", getName(m1), m1->row, getName(m1), m1->col, getName(m2), m2->row, getName(m2), m2->col);
     }
     else
     {
@@ -290,10 +291,10 @@ Matrix *matrix_transpose(Matrix *m)
        (The function is not optimized)
        */
     Matrix *result = malloc(m->row * m->col * sizeof(double));
-    matrix_init(result, m->row, m->col);
-    for (size_t i = 0; i < result->row; i++)
+    matrix_init(result, m->col, m->row);
+    for (size_t i = 0; i < m->row; i++)
     {
-        for (size_t j = 0; j < result->col; j++)
+        for (size_t j = 0; j < m->col; j++)
         {
             double temp = matrix_get(m, i, j);
             matrix_set(result, j, i, temp);
@@ -334,6 +335,16 @@ void matrix_apply_function_in_place(Matrix *m, double (*f)(double))
             matrix_set(m, i, j, temp);
         }
     }
+}
+
+void array_print(double array[], size_t len)
+{
+    printf("|");
+    for (size_t i = 0; i < len; i++)
+    {
+        printf("%2.3lf\t", array[i]);
+    }
+    printf("|\n");
 }
 
 void matrix_print(Matrix *m)
