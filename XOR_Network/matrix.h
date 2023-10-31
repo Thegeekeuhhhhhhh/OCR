@@ -46,6 +46,8 @@ void matrix_apply_function_in_place(Matrix *m, double (*f)(double));
 
 void array_print(double array[], size_t len);
 void matrix_print(Matrix *m);
+double arround(double value);
+void matrix_output_print(Matrix *m);
 void separator();
 int matrix_equals(Matrix *m1, Matrix *m2);
 

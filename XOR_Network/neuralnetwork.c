@@ -212,7 +212,7 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     // the errors found for the output layer to find the hidden layer errors
     Matrix *hiddenLayer_error = matrix_dot_product(matrix_transpose(nn->hidden_outputWeights), outputLayer_error);
 
-    Matrix *hiddenLayer_gradient = matrix_apply_function(hidden, dsigmoid);
+    Matrix *hiddenLayer_gradient = matrix_apply_function(hidden, simpledsigmoid);
     matrix_mul_in_place(hiddenLayer_gradient, hiddenLayer_error);
     matrix_scalar_mul_in_place(hiddenLayer_gradient, nn->lr);
 
@@ -225,7 +225,7 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     // FINAL STEP
     // Adjusting weights and biases with infinitesimal values
     matrix_add_in_place(nn->input_hiddenWeights, dinput_hiddenWeights);
-    //matrix_add_in_place(nn->hidden_biases, hiddenLayer_gradient);
+    matrix_add_in_place(nn->hidden_biases, hiddenLayer_gradient);
 
     /*
        printf("Input layer :\n");
@@ -301,6 +301,7 @@ void shuffle(size_t array[], size_t len)
     for (size_t i = 0; i < len-1; i++)
     {
         size_t j = i + rand() / (RAND_MAX / (len-i)+1);
+        //printf("%d\n", j);
         size_t temp = array[j];
         array[j] = array[i];
         array[i] = temp;
@@ -348,8 +349,9 @@ int main()
     matrix_init(wantedOutputsMatrix, NumberOfOutputs, 1);
 
     size_t trainingIndex[4] = {0, 1, 2, 3};
+    //double t[2] = { 0.0f, 0.0f };
     // Principal loop (Loop on data n times, with n = epoch)
-    for (size_t n = 0; n < 100000; n++)
+    for (size_t n = 0; n < 500000; n++)
     {
         shuffle(trainingIndex, 4);
         //for (size_t a = 0; a < 4; a++)
@@ -359,7 +361,8 @@ int main()
 
         for (size_t a = 0; a < 3; a++)
         {
-            matrix_set(wantedOutputsMatrix, 0, 0, wantedOutputs[trainingIndex[a]][0]);
+            matrix_set(wantedOutputsMatrix, 0, 0,
+                    wantedOutputs[trainingIndex[a]][0]);
             /*
                for (size_t i = 0; i < wantedOutputsMatrix->row; i++)
                {
@@ -375,6 +378,7 @@ int main()
             //array_print(inputs[index], 2);
 
             train(nn, inputs[trainingIndex[a]], 2, wantedOutputsMatrix);
+            //matrix_output_print(feedforward_algo(nn, t, 2));
             //matrix_print(wantedOutputsMatrix);
             //array_print(inputs[index], 2);
             //separator();
@@ -384,14 +388,37 @@ int main()
         }
     }
 
-    double t1[] = { 1.0f, 0.0f };
-    double t2[] = { 0.0f, 1.0f };
-    double t3[] = { 1.0f, 1.0f };
-    double t4[] = { 0.0f, 0.0f };
+    double t1[] = { 0.0f, 0.0f };
+    double t2[] = { 1.0f, 0.0f };
+    double t3[] = { 0.0f, 1.0f };
+    double t4[] = { 1.0f, 1.0f };
 
-    matrix_print(feedforward_algo(nn, t1, 2));
-    matrix_print(feedforward_algo(nn, t2, 2));
-    matrix_print(feedforward_algo(nn, t3, 2));
-    matrix_print(feedforward_algo(nn, t4, 2));
+    //separator();
+    matrix_output_print(feedforward_algo(nn, t1, 2));
+    matrix_output_print(feedforward_algo(nn, t2, 2));
+    matrix_output_print(feedforward_algo(nn, t3, 2));
+    matrix_output_print(feedforward_algo(nn, t4, 2));
+
+    /*
+    double i1;
+    double i2;
+    
+    while(1)
+    {
+        printf("Input 1 : ");
+        fflush(stdout);
+        scanf("%le", &i1);
+        fgetc(stdin);
+        printf("Input 2 : ");
+        fflush(stdout);
+        scanf("%le", &i2);
+        fgetc(stdin);
+
+        t[0] = i1;
+        t[1] = i2;
+
+        matrix_output_print(feedforward_algo(nn, t, 2));
+    }
+    */
     return 0;
 }

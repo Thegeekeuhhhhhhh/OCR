@@ -363,6 +363,32 @@ void matrix_print(Matrix *m)
     }
 }
 
+double arround(double val)
+{
+    if (val < 0.5f)
+    {
+        return 0.0f;
+    }
+    return 1.0f;
+}
+
+void matrix_output_print(Matrix *m)
+{
+    /*
+     Prints the matrix m in a beautiful way, and prints the output rounded
+     to 0 or 1
+     */
+    for (size_t i = 0; i < m->row; i++)
+    {
+        printf("|");
+        for (size_t j = 0; j < m->col; j++)
+        {
+            printf("%2.3lf\t", matrix_get(m, i, j));
+        }
+        printf("| %f\n", arround(matrix_get(m, i, 0)));
+    }
+}
+
 void separator()
 {
     /*
