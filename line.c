@@ -4,14 +4,18 @@
 
 #include "gray_im.h"
 
-struct Line {
+struct l {
     double rho;
     double theta;
 };
 
+struct Line{
+    struct l* line;
+    int nblines;  
+};
 
 // Fonction de transformation de Hough
-struct houghTransform(unsigned char *image, int width, int height) {
+struct Line houghTransform(unsigned char *image, int width, int height) {
     // Initialiser l'espace Hough
     int max_rho = (int) sqrt(width * width + height * height);
     int theta_count = 180;
@@ -32,15 +36,62 @@ struct houghTransform(unsigned char *image, int width, int height) {
             }
         }
     }
+    
+    struct Line* newLine = (struct Line*)malloc(sizeof(struct Line));
+    newLine->nblines = 0;
+    newLine->line = NULL;
 
     // Identifier les maxima locaux dans l'espace Hough pour détecter les lignes
-    // ...
+    findLocalMaxima(newLine->line, accumulator, max_rho, theta_count);
 
     // Libérer la mémoire
     free(accumulator);
 }
 
-void cropImage(SDL_Surface* image, struct Line* lines, int numLines) {
+// Fonction pour identifier les maxima locaux dans l'espace Hough
+void findLocalMaxima(struct Line* newLine, int *accumulator, int max_rho, int theta_count) {
+    int threshold = 100; // Choisir un seuil approprié
+    for (int r = 0; r < max_rho; r++) {
+        for (int t = 0; t < theta_count; t++) {
+            int votes = accumulator[r * theta_count + t];
+            if (votes > threshold) {
+                // Vérifier si le point est un maximum local
+                int is_max = 1;
+                for (int dr = -1; dr <= 1; dr++) {
+                    for (int dt = -1; dt <= 1; dt++) {
+                        if ((dr != 0 || dt != 0) && r + dr >= 0 && r + dr < max_rho && t + dt >= 0 && t + dt < theta_count) {
+                            if (accumulator[(r + dr) * theta_count + (t + dt)] >= votes) {
+                                is_max = 0;
+                                break;
+                            }
+                        }
+                    }
+                    if (!is_max) {
+                        break;
+                    }
+                }
+                if (is_max) {
+                    addLine(newLine, r, t);
+                }
+            }
+        }
+    }
+}
+
+void addLine(struct Line* myLine, double rho, double theta) {
+    myLine->nblines++;
+    myLine->line = (struct l*)realloc(myLine->line, myLine->nblines * sizeof(struct l));
+    if (myLine->line == NULL) {
+        fprintf(stderr, "Memory reallocation failed for struct l.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    myLine->line[myLine->nblines - 1].rho = rho;
+    myLine->line[myLine->nblines - 1].theta = theta;
+}
+
+
+void cropImage(SDL_Surface* image, struct l* lines, int numLines) {
     for (int i = 0; i < numLines; i++) {
         for (int j = i + 1; j < numLines; j++) {
             // Vérifier si les lignes se croisent 
@@ -55,6 +106,10 @@ void cropImage(SDL_Surface* image, struct Line* lines, int numLines) {
                             - lines[j].rho * cos(lines[i].theta)) 
                             / sin(lines[i].theta - lines[j].theta));
 
+                // Déterminer les valeurs de width and height
+                // TODO
+
+
                 // Utiliser ces coordonnées pour définir les limites de découpe et découper l'image
                 SDL_Surface* croppedImage = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
                 SDL_Rect rect;
@@ -64,8 +119,8 @@ void cropImage(SDL_Surface* image, struct Line* lines, int numLines) {
                 rect.h = height; // Mettez la hauteur appropriée ici
                 SDL_BlitSurface(image, &rect, croppedImage, NULL);
 
-                // Enregistrez l'image découpée dans un fichier ou traitez-la comme nécessaire
-                // ...
+                // Enregistrez l'image découpée
+                // TODO
             }
         }
     }
