@@ -17,11 +17,12 @@ typedef struct Matrix
 } Matrix;
 
 void matrix_init(Matrix *m, size_t row, size_t col);
+void matrix_free(Matrix *m);
 void matrix_free_data(Matrix *m);
 
 void matrix_identity(Matrix *m, size_t size);
 void matrix_set(Matrix *m, size_t row, size_t col, double value);
-
+double matrix_get(Matrix *m, size_t row, size_t col);
 
 Matrix *matrix_add(Matrix *m1, Matrix *m2);
 void matrix_add_in_place(Matrix *m1, Matrix *m2);
