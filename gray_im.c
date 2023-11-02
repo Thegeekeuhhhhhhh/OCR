@@ -16,7 +16,8 @@ struct my_image {
 SDL_Surface* load_image(const char* path){
         // loads an image in a surface
     SDL_Surface* tmpSurface = IMG_Load(path);
-    SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface, SDL_PIXELFORMAT_RGB888, 0);
+    SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface, 
+                           SDL_PIXELFORMAT_RGB888, 0);
     SDL_FreeSurface(tmpSurface);
     return surface;
 }
@@ -72,7 +73,21 @@ struct my_image* init_image(SDL_Surface* surface){
     return image;
 }
 
-void update_surface(SDL_Surface* surface, struct my_image* image);
+void update_surface(SDL_Surface* surface, struct my_image* image){
+    Uint8** im_pixels = image->pixels;
+    Uint32* sur_pixels = surface->pixels;
+    int height = image->h;
+    int width = image->w;
+    SDL_PixelFormat * format = surface->format;
+    for(int h = 0; h < height; h++){
+        for(int w = 0; w < width; w++){
+            Uint8 grayscale = im_pixels[h][w];
+            sur_pixels[h * width + w] = SDL_MapRGB(format, grayscale, 
+                                                grayscale, grayscale);
+        }
+    }
+}
+
 
 /*
 int main(int argc, char** argv){
@@ -84,13 +99,17 @@ int main(int argc, char** argv){
     
     SDL_Surface* surface = load_image(argv[1]);
     struct my_image* image = init_image(surface);
-    Uint8** pixels = image->pixels;
+    
+    update_surface(surface, image);
+    
 
-    for(int i = 0; i < 10; i++){    
-        printf("%5hhu", pixels[0][i]);
-        printf("\n");
-    }
-    free_pixels(pixels, image->h);
+
+    int res = SDL_SaveBMP(surface, "test.bmp");
+    printf("res = %d\n", res);
+
+
+
+    free_pixels(image->pixels, image->h);
     SDL_FreeSurface(surface);
     return 0;
 }*/
