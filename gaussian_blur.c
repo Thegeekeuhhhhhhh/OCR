@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "gray_im.c"
+#include "gray_im.h"
+#include "gaussian_blur.h"
 
 short KERNEL_SIZE;
 float PI = 3.14159;
@@ -58,10 +59,11 @@ Uint8** apply_convolution(struct my_image* image, int size, float sigma){
             res_pix[h][w] = sum;
         }
     }
+    free_kernel(kernel);
     return res_pix;
 }
 
-
+/*
 int main(int argc, char** argv){
     KERNEL_SIZE = 7;
     float sum = 0;
@@ -80,8 +82,16 @@ int main(int argc, char** argv){
    
     SDL_Surface* surface = load_image(argv[1]);
     struct my_image* image = init_image(surface);
-    Uint8** blured = apply_convolution(image, 7, 1.5);
+    Uint8** blured = apply_convolution(image, 7, 2.5);
+    
+    image-> pixels = blured;
+    update_surface(surface, image);
+
+    SDL_SaveBMP(surface, "test_blur.bmp");
+    SDL_FreeSurface(surface);
+    free_pixels(image->pixels, image->h);
+    //free_kernel(kernel);
 
 
     return 0;
-}
+}*/

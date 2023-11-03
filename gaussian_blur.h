@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "gray_im.c"
 
 float** init_kernel(double sigma);
 void free_kernel(float** kernel);
