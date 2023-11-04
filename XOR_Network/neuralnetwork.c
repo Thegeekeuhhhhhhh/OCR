@@ -60,10 +60,10 @@ void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hiddenNumber, si
 
 void free_network(NeuralNetwork *nn)
 {
-    free(nn->input_hiddenWeights);
-    free(nn->hidden_outputWeights);
-    free(nn->hidden_biases);
-    free(nn->output_biases);
+    matrix_free(nn->input_hiddenWeights);
+    matrix_free(nn->hidden_outputWeights);
+    matrix_free(nn->hidden_biases);
+    matrix_free(nn->output_biases);
     free(nn);
 }
 
@@ -113,6 +113,9 @@ Matrix *feedforward_algo(NeuralNetwork *nn, double inputs[], size_t len)
 
     // Acvtivation
     matrix_apply_function_in_place(output, sigmoid);
+
+    matrix_free(inputMatrix);
+    matrix_free(hidden);
 
     return output;
 }
@@ -284,6 +287,16 @@ int main(int argc, char** argv)
     p++;
     temp = *p;
     learning_rate = strtod(temp, NULL);
+
+
+
+    double t1[] = { 0.0f, 0.0f };
+    double t2[] = { 1.0f, 0.0f };
+    double t3[] = { 0.0f, 1.0f };
+    double t4[] = { 1.0f, 1.0f };
+
+
+
     for (size_t tx = 1; tx < ite+1; tx++)
     {
         NeuralNetwork *nn = malloc(sizeof(NeuralNetwork));
@@ -364,77 +377,78 @@ int main(int argc, char** argv)
             }
         }
 
-
-        double t1[] = { 0.0f, 0.0f };
-        double t2[] = { 1.0f, 0.0f };
-        double t3[] = { 0.0f, 1.0f };
-        double t4[] = { 1.0f, 1.0f };
-
         //separator();
+
         printf("Training n°%li :\n", tx);
-        printf("-------------------------------------------------\n");
+        printf("----------------------------------------------------\n");
         Matrix *test = feedforward_algo(nn, t1, 2);
-        printf("| Inputs : 0 0 | Outputs : %2.3lf | Expected : 0 |\n"
+        printf("| Inputs : 0 0 | Outputs : %lf | Expected : 0 |\n"
                 , matrix_get(test, 0, 0));
-        
-        free(test);
+
+        //matrix_free(test);
         test = feedforward_algo(nn, t2, 2);
-        printf("| Inputs : 1 0 | Outputs : %2.3lf | Expected : 1 |\n"
+        printf("| Inputs : 1 0 | Outputs : %lf | Expected : 1 |\n"
                 , matrix_get(test, 0, 0));
 
-        free(test);
+        //matrix_free(test);
         test = feedforward_algo(nn, t3, 2);
-        printf("| Inputs : 0 1 | Outputs : %2.3lf | Expected : 1 |\n"
+        printf("| Inputs : 0 1 | Outputs : %lf | Expected : 1 |\n"
                 , matrix_get(test, 0, 0));
 
-        free(test);
+        //matrix_free(test);
         test = feedforward_algo(nn, t4, 2);
-        printf("| Inputs : 1 1 | Outputs : %2.3lf | Expected : 0 |\n"
+        printf("| Inputs : 1 1 | Outputs : %lf | Expected : 0 |\n"
                 , matrix_get(test, 0, 0));
-        printf("-------------------------------------------------\n");
-        
-        //separator();
+        printf("----------------------------------------------------\n");
+
+        //matrix_free(test);
 
 
 
-        // Save the data of the neural network in a file
-        FILE *fileptr = NULL;
-        fileptr = fopen("Values.txt", "w");
-        fprintf(fileptr, "Input to hidden layer Weights :\n");
-        for (size_t i = 0; i < nn->hiddenNodes; i++)
+
+        if (tx == ite)
         {
-            fprintf(fileptr, "|");
-            for (size_t j = 0; j < nn->inputNodes; j++)
+            // Save the data of the neural network in a file
+            FILE *fileptr = NULL;
+            fileptr = fopen("Values.txt", "w");
+            fprintf(fileptr, "Input to hidden layer Weights :\n");
+            for (size_t i = 0; i < nn->inputNodes; i++)
             {
-                double temp = matrix_get(nn->input_hiddenWeights, i, j);
-                fprintf(fileptr, "%2.6f\t|", temp);
+                fprintf(fileptr, "|");
+                for (size_t j = 0; j < nn->hiddenNodes; j++)
+                {
+                    double temp = matrix_get(nn->input_hiddenWeights, i, j);
+                    fprintf(fileptr, "%lf\t|", temp);
+                }
+                fprintf(fileptr, "\n");
             }
-            fprintf(fileptr, "\n");
-        }
 
-        fprintf(fileptr, "\nHidden layer biases :\n");
-        for (size_t i = 0; i < nn->hidden_biases->row; i++)
-        {
-            double temp = matrix_get(nn->hidden_biases, i, 0);
-            fprintf(fileptr, "|%2.6f\t|\n", temp);
-        }
-
-        fprintf(fileptr, "\nHidden to output layer Weights :\n");
-        for (size_t i = 0; i < nn->outputNodes; i++)
-        {
-            fprintf(fileptr, "|");
-            for (size_t j = 0; j < nn->outputNodes; j++)
+            fprintf(fileptr, "\nHidden layer biases :\n");
+            for (size_t i = 0; i < nn->hidden_biases->row; i++)
             {
-                double temp = matrix_get(nn->hidden_outputWeights, i, j);
-                fprintf(fileptr, "%2.6f\t|", temp);
+                double temp = matrix_get(nn->hidden_biases, i, 0);
+                fprintf(fileptr, "|%lf\t|\n", temp);
             }
-            fprintf(fileptr, "\n");
-        }
-        fprintf(fileptr, "\nOutput layer biases :\n");
-        for (size_t i = 0; i < nn->output_biases->row; i++)
-        {
-            double temp = matrix_get(nn->output_biases, i, 0);
-            fprintf(fileptr, "|%2.6f\t|\n", temp);
+
+            fprintf(fileptr, "\nHidden to output layer Weights :\n");
+            for (size_t i = 0; i < nn->outputNodes; i++)
+            {
+                fprintf(fileptr, "|");
+                for (size_t j = 0; j < nn->hiddenNodes; j++)
+                {
+                    double temp = matrix_get(nn->hidden_outputWeights, i, j);
+                    fprintf(fileptr, "%lf\t|", temp);
+                }
+                fprintf(fileptr, "\n");
+            }
+            fprintf(fileptr, "\nOutput layer biases :\n");
+            for (size_t i = 0; i < nn->output_biases->row; i++)
+            {
+                double temp = matrix_get(nn->output_biases, i, 0);
+                fprintf(fileptr, "|%lf\t|\n", temp);
+            }
+
+            fclose(fileptr);
         }
 
 
