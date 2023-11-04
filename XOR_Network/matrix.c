@@ -25,6 +25,12 @@ void matrix_free_data(Matrix *m)
     free(m->data);
 }
 
+void matrix_free(Matrix *m)
+{
+    free(m->data);
+    free(m);
+}
+
 void matrix_identity(Matrix *m, size_t size)
 {
     /*
