@@ -67,7 +67,6 @@ int main(int argc, char** argv)
     }while(1)
 
     //save l'image dans un new fichier;
-    SDL_Texture* target = SDL_GetRenderTarget(renderer);
     SDL_SetRenderTarget(renderer, texture);
     SDL_QueryTexture(texture, NULL, NULL, &w, &h);
     SDL_Surface* surface = SDL_CreateRGBSurface(0, w, 
@@ -76,6 +75,8 @@ int main(int argc, char** argv)
         surface->pixels, surface->pitch);
     IMG_SavePNG(surface, filename);
     SDL_FreeSurface(surface);
+    
+    SDL_Texture* target = SDL_GetRenderTarget(renderer);
     SDL_SetRenderTarget(renderer, target);
 
     //Dégage le SDL
