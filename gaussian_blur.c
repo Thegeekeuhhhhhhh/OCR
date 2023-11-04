@@ -11,7 +11,9 @@ short KERNEL_SIZE;
 float PI = 3.14159;
 
 
-float** init_kernel(double sigma){
+float** init_kernel(double sigma, int size){
+    KERNEL_SIZE = size;
+    double sum = 0;
     int offset = KERNEL_SIZE/2;
     float** kernel = (float**)malloc(KERNEL_SIZE * sizeof(float*));
     for(int y = 0; y < KERNEL_SIZE; y++){
@@ -22,8 +24,15 @@ float** init_kernel(double sigma){
             float value = (1/(2*PI*sigma*sigma))*expf(-(float)(x_offset*x_offset + y_offset*y_offset)/(2*sigma*sigma));
             // printf("here value = %f \n", value);
             kernel[y][x] = value;
+            sum += value;
         }
     }
+    for (int y = 0; y < size; y++) {
+        for (int x = 0; x < size; x++) {
+            kernel[y][x] /= sum;
+        }
+    }
+   
     return kernel;
 }
 
@@ -37,8 +46,7 @@ void free_kernel(float** kernel){
 
 
 Uint8** apply_convolution(struct my_image* image, int size, float sigma){
-    KERNEL_SIZE = size;
-    float** kernel = init_kernel(sigma);
+    float** kernel = init_kernel(sigma, size);
     Uint8** pixels = image->pixels;
     int height = image->h;
     int width = image->w;
@@ -64,10 +72,48 @@ Uint8** apply_convolution(struct my_image* image, int size, float sigma){
 }
 
 /*
+int clamp(int value, int min, int max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
+
+Uint8** apply_convolution(struct my_image* image, float** kernel) {
+    int height = image->h;
+    int width = image->w;
+    int kernelSize = KERNEL_SIZE;  // Adjust this as needed based on your kernel size
+
+    // Create a result array to store the filtered image
+    Uint8** result = init_pixels_mat(height, width);
+
+    int halfSize = kernelSize / 2;
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            double sum = 0.0;
+
+            for (int ky = -halfSize; ky <= halfSize; ky++) {
+                for (int kx = -halfSize; kx <= halfSize; kx++) {
+                    int pixelY = clamp(y + ky, 0, height - 1);
+                    int pixelX = clamp(x + kx, 0, width - 1);
+                    Uint8 pixelValue = image->pixels[pixelY][pixelX];
+                    double weight = kernel[ky + halfSize][kx + halfSize];
+                    sum += pixelValue * weight;
+                }
+            }
+
+            result[y][x] = (Uint8)round(sum);
+        }
+    }
+
+    return result;
+}
+*/
+/*
 int main(int argc, char** argv){
-    KERNEL_SIZE = 7;
     float sum = 0;
-    float** kernel = init_kernel(0.84089642);
+    float** kernel = init_kernel(2.5,7);
     for(int i = 0; i <KERNEL_SIZE; i++){
         for(int j = 0; j < KERNEL_SIZE; j++){
             printf("%7.4f", kernel[i][j]);
@@ -76,14 +122,14 @@ int main(int argc, char** argv){
         printf("\n");
     }
     printf("sum = %f\n", sum);
-    free_kernel(kernel);
     int i = 7/2;
     printf("%d\n",i);
    
     SDL_Surface* surface = load_image(argv[1]);
     struct my_image* image = init_image(surface);
+
     Uint8** blured = apply_convolution(image, 7, 2.5);
-    
+printf("fw\n"); 
     image-> pixels = blured;
     update_surface(surface, image);
 

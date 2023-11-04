@@ -8,9 +8,10 @@
 #include <math.h>
 
 
-float** init_kernel(double sigma);
+float** init_kernel(double sigma, int size);
 void free_kernel(float** kernel);
-Uint8** apply_convolution(struct my_image* image, int size, float sigma);
 
+Uint8** apply_convolution(struct my_image* image, int size, float sigma);
+//Uint8** apply_convolution(struct my_image* image, float** kernel);
 
 #endif
