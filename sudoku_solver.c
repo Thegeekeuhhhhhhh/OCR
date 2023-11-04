@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sudoku_solver.h"
 
@@ -32,14 +33,14 @@ int main_solver(int argc, char** argv) {
             //if n is a point translates it in a zero
             if (n == '.')
             {sudoku_ori[row][col] = 0;
-            sudoku_res[row][col] = 0; c++; continue;}
+            sudoku_res[row][col] = 0; col++; continue;}
             //cas d'erreur
             if ('0' > n && '9' < n) { return 0; }
             //cas normal
             sudoku_ori[row][col] = n - '0';
             sudoku_res[row][col] = n - '0';
             col++;
-        } while (!feof() && row < 11);
+        } while (!feof(n) && row < 11);
         // feof() check si c'est la fin du fichier
         fclose(inFile);
         
@@ -121,11 +122,11 @@ int solve_cell(int row, int col)
 int valid(int row, int col, int guess) {
   int corner_x = row / 3 * 3;
   int corner_y = col / 3 * 3;
-  if (soduko_ori[row][col] != guess) return 0;
+  if (sudoku_ori[row][col] != guess) return 0;
   for (int x = 0; x < SIZE; ++x) {
-    if (soduko_res[row][x] == guess) return 0;
-    if (soduko_res[x][col] == guess) return 0;
-    if (soduko_res[corner_x + (x % 3)][corner_y + (x / 3)] == guess) return 0;
+    if (sudoku_res[row][x] == guess) return 0;
+    if (sudoku_res[x][col] == guess) return 0;
+    if (sudoku_res[corner_x + (x % 3)][corner_y + (x / 3)] == guess) return 0;
   }
   return 1;
 }
