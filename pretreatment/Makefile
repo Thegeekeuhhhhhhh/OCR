@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-CC = gcc
-CFLAGS = -Wall -Wextra
-LDFLAGS = -lSDL2 -lSDL2_image
-
-all: rotation sudoku_solver
-
-rotation: rotation.c
-	$(CC) $(CFLAGS) -o rotation rotation.c $(LDFLAGS)
-
-sudoku_solver: sudoku_solver.c sudoku_solver.h
-	$(CC) $(CFLAGS) -o sudoku_solver sudoku_solver.c
-
-clean:
-	rm -f rotation sudoku_solver
-
-.PHONY: all clean
-=======
 CC = gcc #-fsanitize=address
 CFLAGS = -Wall -Wextra -O3 `pkg-config --cflags sdl2 SDL2_image`
 LDLIBS = `pkg-config --libs sdl2 SDL2_image` -lm
@@ -45,4 +27,3 @@ binarisation.o: binarisation.c binarisation.h gray_im.h gaussian_blur.h
 clean:
 	rm -f gaussian_blur binarisation $(OBJ)
 
->>>>>>> Pic_PreTreatment
