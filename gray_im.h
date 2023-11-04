@@ -6,7 +6,13 @@
 #include <err.h>
 #include <stdlib.h>
 
-struct my_image;
+struct my_image {
+    Uint8** pixels;  // 2d array of pixels[h][w] as grayscales values
+    int h;           // height
+    int w;           // width
+    SDL_PixelFormat* format;
+};
+
 SDL_Surface* load_image(const char* path);
 Uint8** init_pixels_mat(int h, int w);
 void free_pixels(Uint8** pixels, int h);

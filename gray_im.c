@@ -5,14 +5,6 @@
 
 #include "gray_im.h"
 
-struct my_image {
-    Uint8** pixels;  // 2d array of pixels[h][w] as grayscales values
-    int h;           // height
-    int w;           // width
-    SDL_PixelFormat* format; 
-};
-
-
 SDL_Surface* load_image(const char* path){
         // loads an image in a surface
     SDL_Surface* tmpSurface = IMG_Load(path);

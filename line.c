@@ -1,21 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <err.h>
 
 #include "gray_im.h"
+#include "line.h"
 
-struct l {
-    double rho;
-    double theta;
-};
+// Initialisation de la fenêtre SDL
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
+int SCREEN_WIDTH = 640;
+int SCREEN_HEIGHT = 480;
 
-struct Line{
-    struct l* line;
-    int nblines;  
-};
 
 // Fonction de transformation de Hough
-struct Line houghTransform(unsigned char *image, int width, int height) {
+struct Line houghTransform(Uint8** pixels, int width, int height) {
     // Initialiser l'espace Hough
     int max_rho = (int) sqrt(width * width + height * height);
     int theta_count = 180;
@@ -24,7 +23,7 @@ struct Line houghTransform(unsigned char *image, int width, int height) {
     // Boucle sur les points de l'image
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            if (image[y * width + x] > 0) {
+            if (pixels[x][y] > 0) {
                 // Boucle sur les valeurs de theta
                 for (int t = 0; t < theta_count; t++) {
                     double theta = t * M_PI / 180.0;
@@ -42,15 +41,18 @@ struct Line houghTransform(unsigned char *image, int width, int height) {
     newLine->line = NULL;
 
     // Identifier les maxima locaux dans l'espace Hough pour détecter les lignes
-    findLocalMaxima(newLine->line, accumulator, max_rho, theta_count);
+    findLocalMaxima(newLine, accumulator, max_rho, theta_count, width);
 
     // Libérer la mémoire
     free(accumulator);
+    return *newLine;
 }
 
 // Fonction pour identifier les maxima locaux dans l'espace Hough
-void findLocalMaxima(struct Line* newLine, int *accumulator, int max_rho, int theta_count) {
-    int threshold = 100; // Choisir un seuil approprié
+void findLocalMaxima(struct Line* newLine, int *accumulator
+                , int max_rho, int theta_count, int width) {
+    
+    int threshold = 1/4*width; // Choisir un seuil approprié
     for (int r = 0; r < max_rho; r++) {
         for (int t = 0; t < theta_count; t++) {
             int votes = accumulator[r * theta_count + t];
@@ -59,7 +61,11 @@ void findLocalMaxima(struct Line* newLine, int *accumulator, int max_rho, int th
                 int is_max = 1;
                 for (int dr = -1; dr <= 1; dr++) {
                     for (int dt = -1; dt <= 1; dt++) {
-                        if ((dr != 0 || dt != 0) && r + dr >= 0 && r + dr < max_rho && t + dt >= 0 && t + dt < theta_count) {
+                        if ((dr != 0 || dt != 0) 
+                                && r + dr >= 0 
+                                && r + dr < max_rho 
+                                && t + dt < theta_count) {
+
                             if (accumulator[(r + dr) * theta_count + (t + dt)] >= votes) {
                                 is_max = 0;
                                 break;
@@ -90,7 +96,7 @@ void addLine(struct Line* myLine, double rho, double theta) {
     myLine->line[myLine->nblines - 1].theta = theta;
 }
 
-
+/* // TODO
 void cropImage(SDL_Surface* image, struct l* lines, int numLines) {
     for (int i = 0; i < numLines; i++) {
         for (int j = i + 1; j < numLines; j++) {
@@ -125,13 +131,102 @@ void cropImage(SDL_Surface* image, struct l* lines, int numLines) {
         }
     }
 }
+*/
 
-int main() {
-    // Charger l'image et la convertir en niveau de gris
-    // ...
+// Fonction pour afficher les lignes sur la surface SDL
+void drawLines(struct Line* myLine) {
+    for (int i = 0; i < myLine->nblines; i++) {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Couleur red
+        double rho = myLine->line[i].rho;
+        double theta = myLine->line[i].theta;
+        int lineLength = 200; // Longueur de la ligne à afficher
+
+        // Calculer les coordonnées de début de la ligne
+        int x_start = (int)(rho * cos(theta)) + SCREEN_WIDTH / 2;
+        int y_start = (int)(rho * sin(theta)) + SCREEN_HEIGHT / 2;
+
+        // Calculer les coordonnées de fin de la ligne
+        int x_end = (int)(x_start + lineLength * cos(theta));
+        int y_end = (int)(y_start + lineLength * sin(theta));
+
+        // Dessiner la ligne
+        SDL_RenderDrawLine(renderer, x_start, y_start, x_end, y_end);
+    }
+}
+
+// Fonction pour initialiser SDL
+int initSDL() {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        return 0;
+    }
+    window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    if (window == NULL) {
+        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+        return 0;
+    }
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL) {
+        printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+        return 0;
+    }
+    return 1;
+}
+
+
+int main(int argc, char** argv) {
+    /*
+    if(argc > 3 || argc < 2) {
+        err(1, "Usage: /line imagefile (optional param) ");
+    }
+
+    // Load image
+    SDL_Surface *surf = load_image(argv[1]);
+    struct my_image* img = init_image(surf);
 
     // Appeler la fonction de transformation de Hough
-    // houghTransform(image, width, height);
+    houghTransform(img->pixels, img->w, img->h);
+
+    return 0;
+    */
+    // Initialiser SDL
+    if (!initSDL()) {
+        return -1;
+    }
+
+       // Créer une instance de Line et ajouter des lignes (à titre d'exemple)
+    struct Line myLine;
+    myLine.nblines = 3;
+    myLine.line = (struct l*)malloc(myLine.nblines * sizeof(struct l));
+    myLine.line[0].rho = 100;
+    myLine.line[0].theta = M_PI / 4;
+    myLine.line[1].rho = 150;
+    myLine.line[1].theta = M_PI / 3;
+    myLine.line[2].rho = 80;
+    myLine.line[2].theta = M_PI / 6;
+
+    // Dessiner les lignes sur la surface
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Couleur de fond noire
+    SDL_RenderClear(renderer);
+    drawLines(&myLine);
+    SDL_RenderPresent(renderer);
+
+    // Boucle d'événements principale
+    SDL_Event e;
+    int quit = 0;
+    while (!quit) {
+        while (SDL_PollEvent(&e) != 0) {
+            if (e.type == SDL_QUIT) {
+                quit = 1;
+            }
+        }
+    }
+    
+    // Nettoyage et fermeture de SDL
+    free(myLine.line);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return 0;
 }
