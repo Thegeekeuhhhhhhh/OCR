@@ -19,3 +19,4 @@ perceptron.o: perceptron.c perceptron.h matrix.h
 
 clean:
 	rm -f *.o neuralnetwork *.d
+	rm Values.txt
