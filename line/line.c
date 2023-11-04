@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <err.h>
 
 #include "gray_im.h"
 #include "line.h"
@@ -52,7 +51,7 @@ struct Line houghTransform(Uint8** pixels, int width, int height) {
 void findLocalMaxima(struct Line* newLine, int *accumulator
                 , int max_rho, int theta_count, int width) {
     
-    int threshold = 1/4*width; // Choisir un seuil approprié
+    int threshold = 1/2*width; // Choisir un seuil approprié
     for (int r = 0; r < max_rho; r++) {
         for (int t = 0; t < theta_count; t++) {
             int votes = accumulator[r * theta_count + t];
@@ -64,7 +63,8 @@ void findLocalMaxima(struct Line* newLine, int *accumulator
                         if ((dr != 0 || dt != 0) 
                                 && r + dr >= 0 
                                 && r + dr < max_rho 
-                                && t + dt < theta_count) {
+                                && t + dt < theta_count
+                                && ((r + dr) * theta_count + (t + dt)) < (max_rho * theta_count)) {
 
                             if (accumulator[(r + dr) * theta_count + (t + dt)] >= votes) {
                                 is_max = 0;
@@ -140,11 +140,12 @@ void drawLines(struct Line* myLine) {
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Couleur red
         double rho = myLine->line[i].rho;
         double theta = myLine->line[i].theta;
-        int lineLength = 200; // Longueur de la ligne à afficher
+        
+        int lineLength = 300; // Longueur de la ligne à afficher
 
         // Calculer les coordonnées de début de la ligne
-        int x_start = (int)(rho * cos(theta)) + SCREEN_WIDTH / 2;
-        int y_start = (int)(rho * sin(theta)) + SCREEN_HEIGHT / 2;
+        int x_start = (int)(rho * cos(theta));
+        int y_start = (int)(rho * sin(theta));
 
         // Calculer les coordonnées de fin de la ligne
         int x_end = (int)(x_start + lineLength * cos(theta));
@@ -161,7 +162,7 @@ int initSDL() {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 0;
     }
-    window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Line Detection", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         return 0;
@@ -177,10 +178,11 @@ int initSDL() {
 
 int main(int argc, char** argv) {
 
-    if(argc > 3 || argc < 2) {
-        err(2, "Usage: /line imagefile (optional param)");
+    if (argc < 2 || argc > 3) {
+        fprintf(stderr, "Usage: %s imagefile (optional param)\n", argv[0]);
+        exit(1);
     }
- 
+
     SDL_Surface *surf = load_image(argv[1]);
     struct my_image* img = init_image(surf);
 
@@ -203,6 +205,9 @@ int main(int argc, char** argv) {
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     drawLines(&myLine);
+    
+    printf("%i\n", myLine.nblines);
+
     SDL_RenderPresent(renderer);
 
     // Boucle d'événements principale
