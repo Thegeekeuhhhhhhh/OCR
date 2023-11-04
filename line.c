@@ -9,8 +9,8 @@
 // Initialisation de la fenêtre SDL
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
-int SCREEN_WIDTH = 640;
-int SCREEN_HEIGHT = 480;
+int SCREEN_WIDTH;
+int SCREEN_HEIGHT;
 
 
 // Fonction de transformation de Hough
@@ -78,6 +78,7 @@ void findLocalMaxima(struct Line* newLine, int *accumulator
                 }
                 if (is_max) {
                     addLine(newLine, r, t);
+                    
                 }
             }
         }
@@ -175,39 +176,32 @@ int initSDL() {
 
 
 int main(int argc, char** argv) {
-    /*
-    if(argc > 3 || argc < 2) {
-        err(1, "Usage: /line imagefile (optional param) ");
-    }
 
-    // Load image
+    if(argc > 3 || argc < 2) {
+        err(2, "Usage: /line imagefile (optional param)");
+    }
+ 
     SDL_Surface *surf = load_image(argv[1]);
     struct my_image* img = init_image(surf);
 
-    // Appeler la fonction de transformation de Hough
-    houghTransform(img->pixels, img->w, img->h);
+    // Créer une instance de Line et ajouter des lignes (à titre d'exemple)
+    struct Line myLine = houghTransform(img->pixels, img->w, img->h);
+    
+    // Fixe les tailles de la fenêtre 
+    SCREEN_WIDTH = surf->w;
+    SCREEN_HEIGHT = surf->h;
 
-    return 0;
-    */
     // Initialiser SDL
     if (!initSDL()) {
         return -1;
     }
-
-       // Créer une instance de Line et ajouter des lignes (à titre d'exemple)
-    struct Line myLine;
-    myLine.nblines = 3;
-    myLine.line = (struct l*)malloc(myLine.nblines * sizeof(struct l));
-    myLine.line[0].rho = 100;
-    myLine.line[0].theta = M_PI / 4;
-    myLine.line[1].rho = 150;
-    myLine.line[1].theta = M_PI / 3;
-    myLine.line[2].rho = 80;
-    myLine.line[2].theta = M_PI / 6;
+    
 
     // Dessiner les lignes sur la surface
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Couleur de fond noire
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
+    
     SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
     drawLines(&myLine);
     SDL_RenderPresent(renderer);
 
@@ -224,6 +218,8 @@ int main(int argc, char** argv) {
     
     // Nettoyage et fermeture de SDL
     free(myLine.line);
+    SDL_FreeSurface(surf);
+    SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
