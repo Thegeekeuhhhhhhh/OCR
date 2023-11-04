@@ -13,7 +13,7 @@ int sudoku_res[SIZE][SIZE];
 int row = 0, col = 0;
 
 
-int main_solver(int argc, char** argv) {
+int main(int argc, char** argv) {
     if (argc == 2)
     {
         FILE* inFile = fopen(argv[1], "r");
@@ -132,7 +132,7 @@ int valid(int row, int col, int guess) {
 }
 
 //print the solved_states
-void print_sudoku(int sudo[SIZE][SIZE])
+void print_sudoku(int sudo[9][9])
 {
     for (int i = 0; i < 9; i++) {
         if (i % 3 == 0)

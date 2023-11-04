@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 
@@ -22,7 +23,8 @@ int main(int argc, char** argv)
     if (window == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 
+        SDL_RENDERER_ACCELERATED);
     if (renderer == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -73,9 +75,10 @@ int main(int argc, char** argv)
         h, 32, 0, 0, 0, 0);
     SDL_RenderReadPixels(renderer, NULL, surface->format->format, 
         surface->pixels, surface->pitch);
-    IMG_SavePNG(surface, filename);
+    char* outName = argv[1];
+    outName = strcat("result_", outName);
+    IMG_SavePNG(surface, outName);
     SDL_FreeSurface(surface);
-    
     SDL_Texture* target = SDL_GetRenderTarget(renderer);
     SDL_SetRenderTarget(renderer, target);
 
