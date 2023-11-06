@@ -127,7 +127,7 @@ void cropImage(SDL_Surface* image, struct l* lines, int numLines, struct my_imag
 
                 // Enregistrez l'image découpée dans un répertoire spécifié
                 char filename[100];
-                sprintf(filename, "%s/cropped_%d.png", outputDirectory, i); // Nom de fichier basé sur l'index de la ligne
+                sprintf(filename, "%s/cropped_%02d.png", outputDirectory, i); // Nom de fichier basé sur l'index de la ligne
                 IMG_SavePNG(croppedImage, filename);
 
                 SDL_FreeSurface(croppedImage);
