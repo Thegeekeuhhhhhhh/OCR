@@ -51,7 +51,7 @@ struct Line houghTransform(Uint8** pixels, int width, int height) {
 void findLocalMaxima(struct Line* newLine, int *accumulator
                 , int max_rho, int theta_count, int width) {
     
-    int threshold = 1/2*width; // Choisir un seuil approprié
+    int threshold = width/2; // Choisir un seuil approprié
     for (int r = 0; r < max_rho; r++) {
         for (int t = 0; t < theta_count; t++) {
             int votes = accumulator[r * theta_count + t];
@@ -97,60 +97,70 @@ void addLine(struct Line* myLine, double rho, double theta) {
     myLine->line[myLine->nblines - 1].theta = theta;
 }
 
-/* // TODO
-void cropImage(SDL_Surface* image, struct l* lines, int numLines) {
+void cropImage(SDL_Surface* image, struct l* lines, int numLines, struct my_image *img ,const char* outputDirectory) {
     for (int i = 0; i < numLines; i++) {
         for (int j = i + 1; j < numLines; j++) {
-            // Vérifier si les lignes se croisent 
-            // ou sont suffisamment proches pour être 
+            // Vérifier si les lignes se croisent
+            // ou sont suffisamment proches pour être
             // considérées comme intersectantes
             if (fabs(lines[i].theta - lines[j].theta) > 0.1) {
                 // Calculer les coordonnées de l'intersection des lignes
                 int x_intersect = (int)((lines[j].rho * sin(lines[i].theta)
-                            - lines[i].rho * sin(lines[j].theta)) 
+                            - lines[i].rho * sin(lines[j].theta))
                             / sin(lines[j].theta - lines[i].theta));
                 int y_intersect = (int)((lines[i].rho * cos(lines[j].theta)
-                            - lines[j].rho * cos(lines[i].theta)) 
+                            - lines[j].rho * cos(lines[i].theta))
                             / sin(lines[i].theta - lines[j].theta));
 
                 // Déterminer les valeurs de width and height
-                // TODO
-
+                int width = img->w/10; // Remplacez par la valeur appropriée
+                int height = img->h/10; // Remplacez par la valeur appropriée
 
                 // Utiliser ces coordonnées pour définir les limites de découpe et découper l'image
                 SDL_Surface* croppedImage = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
                 SDL_Rect rect;
-                rect.x = 0; // Mettez les coordonnées appropriées ici
-                rect.y = 0; // Mettez les coordonnées appropriées ici
+                rect.x = x_intersect; // Mettez les coordonnées appropriées ici
+                rect.y = y_intersect; // Mettez les coordonnées appropriées ici
                 rect.w = width; // Mettez la largeur appropriée ici
                 rect.h = height; // Mettez la hauteur appropriée ici
                 SDL_BlitSurface(image, &rect, croppedImage, NULL);
 
-                // Enregistrez l'image découpée
-                // TODO
+                // Enregistrez l'image découpée dans un répertoire spécifié
+                char filename[100];
+                sprintf(filename, "%s/cropped_%d.png", outputDirectory, i); // Nom de fichier basé sur l'index de la ligne
+                IMG_SavePNG(croppedImage, filename);
+
+                SDL_FreeSurface(croppedImage);
             }
         }
     }
 }
-*/
 
 // Fonction pour afficher les lignes sur la surface SDL
-void drawLines(struct Line* myLine) {
+void drawLines(struct my_image *img, struct Line* myLine) {
     for (int i = 0; i < myLine->nblines; i++) {
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Couleur red
         double rho = myLine->line[i].rho;
         double theta = myLine->line[i].theta;
         
-        int lineLength = 500; // Longueur de la ligne à afficher
-
+        int width = img->w;
+        int height = img->h;
+        
         // Calculer les coordonnées de début de la ligne
         int x_start = (int)(rho * cos(theta));
         int y_start = (int)(rho * sin(theta));
 
         // Calculer les coordonnées de fin de la ligne
-        int x_end = (int)(x_start + lineLength * cos(theta));
-        int y_end = (int)(y_start + lineLength * sin(theta));
-
+        int x_end, y_end;
+        if (sin(theta) != 0) {
+            // Si sin(theta) est différent de zéro
+            x_end = width;
+            y_end = y_start;
+        } else {
+            // Si sin(theta) est égal à zéro, gérer le cas spécifique
+            x_end = x_start;
+            y_end = height;
+        }
         // Dessiner la ligne
         SDL_RenderDrawLine(renderer, x_start, y_start, x_end, y_end);
     }
@@ -179,7 +189,7 @@ int initSDL() {
 int main(int argc, char** argv) {
 
     if (argc < 2 || argc > 3) {
-        fprintf(stderr, "Usage: %s imagefile (optional param)\n", argv[0]);
+        fprintf(stderr, "Usage: %s imagefile (optional param \"-cut\")\n", argv[0]);
         exit(1);
     }
 
@@ -204,11 +214,13 @@ int main(int argc, char** argv) {
     
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
-    drawLines(&myLine);
+    drawLines(img,&myLine);
     
     printf("%i\n", myLine.nblines);
 
     SDL_RenderPresent(renderer);
+
+    cropImage(surf, myLine.line, myLine.nblines, img, "output");
 
     // Boucle d'événements principale
     SDL_Event e;

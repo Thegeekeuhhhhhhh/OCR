@@ -24,6 +24,5 @@ void findLocalMaxima(struct Line* newLine, int *accumulator
 
 void addLine(struct Line* myLine, double rho, double theta);
 
-void cropImage(SDL_Surface* image, struct l* lines, int numLines);
 
 #endif
