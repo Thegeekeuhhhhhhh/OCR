@@ -40,28 +40,23 @@ int main(int argc, char** argv) {
             sudoku_ori[row][col] = n - '0';
             sudoku_res[row][col] = n - '0';
             col++;
-        } while (!feof(n) && row < 11);
+        } while (n!= EOF && row < 11);
         // feof() check si c'est la fin du fichier
         fclose(inFile);
-        
         // sudoku solvable ?
-        for (int i = 0; i < 9; i++)
-            for (int j = 0; j < 9; j++)
-                if (sudoku_res[i][j])
-                    if (!valid(i, j, sudoku_res[i][j]))
-                        return 0;
-
-
-        //used to debug: print_sudoku(sudoku_res);
+        //for (int i = 0; i < 9; i++)
+            //for (int j = 0; j < 9; j++)
+                //if (sudoku_res[i][j])
+                    //if (!valid(i, j, sudoku_res[i][j]))
+	////return 0;
+        print_sudoku(sudoku_res);
         
         //résolution
-        if (solve_cell(0, 0)) {
+	if (solve_cell(0, 0)) {
             printf("\nunsolvable grid !\n");
             return 0;
         }
-
-
-        //used to debug: print_sudoku(sudoku_res);
+        print_sudoku(sudoku_res);
         
         // ecriture dans le fichier solution
         FILE* solved;
@@ -120,15 +115,28 @@ int solve_cell(int row, int col)
 
 //verifie si la case est valide
 int valid(int row, int col, int guess) {
-  int corner_x = row / 3 * 3;
-  int corner_y = col / 3 * 3;
-  if (sudoku_ori[row][col] != guess) return 0;
-  for (int x = 0; x < SIZE; ++x) {
-    if (sudoku_res[row][x] == guess) return 0;
-    if (sudoku_res[x][col] == guess) return 0;
-    if (sudoku_res[corner_x + (x % 3)][corner_y + (x / 3)] == guess) return 0;
-  }
-  return 1;
+	int i, j, r, c;
+	if (sudoku_ori[row][col] != 0)
+		if (sudoku_ori[row][col] != guess){return 0;}
+	for (i = 0; i < 9; i++) {
+		if (i != col)
+			if (sudoku_res[row][i] == guess){
+				return 0;
+			}
+		if (i != row)
+			if (sudoku_res[i][col] == guess){
+				return 0;
+			}
+	}
+	r = (row / 3) * 3;
+	c = (col / 3) * 3;
+	for (i = r; i < r + 3; i++)
+		for (j = c; j < c + 3; j++)
+			if (i != row || j != col)
+				if (sudoku_res[i][j] == guess){
+					return 0;
+				}
+	return 1;
 }
 
 //print the solved_states

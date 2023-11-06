@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 
     SDL_SetWindowSize(window, w, h);
     //fin init :
-    // Image set up et affiché
+    // Image set up et affich?
 
     //fait la rotation
     SDL_Event event;
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
             }
             break;
         }
-    }while(1)
+    }while(!test_rota);
 
     //save l'image dans un new fichier;
     SDL_SetRenderTarget(renderer, texture);
@@ -78,11 +78,13 @@ int main(int argc, char** argv)
     char* outName = argv[1];
     outName = strcat("result_", outName);
     IMG_SavePNG(surface, outName);
+    printf("!");
     SDL_FreeSurface(surface);
+    printf("2");
     SDL_Texture* target = SDL_GetRenderTarget(renderer);
     SDL_SetRenderTarget(renderer, target);
 
-    //Dégage le SDL
+    //D?gage le SDL
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
