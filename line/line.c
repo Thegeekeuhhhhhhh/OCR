@@ -141,7 +141,7 @@ void drawLines(struct Line* myLine) {
         double rho = myLine->line[i].rho;
         double theta = myLine->line[i].theta;
         
-        int lineLength = 300; // Longueur de la ligne à afficher
+        int lineLength = 500; // Longueur de la ligne à afficher
 
         // Calculer les coordonnées de début de la ligne
         int x_start = (int)(rho * cos(theta));

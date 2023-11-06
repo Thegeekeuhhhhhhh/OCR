@@ -4,17 +4,6 @@
 #include <stdlib.h>
 
 #include "gray_im.h"
-<<<<<<< HEAD:line/gray_im.c
-=======
-/*
-struct my_image {
-    Uint8** pixels;  // 2d array of pixels[h][w] as grayscales values
-    int h;           // height
-    int w;           // width
-    SDL_PixelFormat* format; 
-};
-*/
->>>>>>> Pic_PreTreatment:gray_im.c
 
 SDL_Surface* load_image(const char* path){
         // loads an image in a surface
