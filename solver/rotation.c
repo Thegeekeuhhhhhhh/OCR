@@ -6,7 +6,40 @@
 #include <stdlib.h>
 #include <string.h>
 
+void draw(SDL_Renderer* renderer, SDL_Texture* texture, char* angle)
+{
+    int rota = SDL_RenderCopyEx(renderer, texture, NULL,
+                  NULL, -atoi(angle), NULL, SDL_FLIP_NONE);
+    if (rota)
+    {
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    }
+    SDL_RenderPresent(renderer);
+}
 
+
+    //fait la rotation
+void event_loop(SDL_Renderer* renderer, SDL_Texture* texture,char* angle){
+    SDL_Event event;
+    int test_rota = 0;
+    do
+    {
+        SDL_WaitEvent(&event);
+        switch (event.type)
+        {
+        case SDL_QUIT:
+            return;
+        case SDL_WINDOWEVENT:
+            //test changement d'image;
+            if (event.window.event == SDL_WINDOWEVENT_RESIZED && !test_rota)
+            {
+                draw (renderer, texture, angle);
+                test_rota = 1;
+            }
+            break;
+        }
+    }while(1);
+}
 
 
 int main(int argc, char** argv)
@@ -37,58 +70,30 @@ int main(int argc, char** argv)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
     SDL_SetWindowSize(window, w, h);
-    //fin init :
-    // Image set up et affich?
 
-    //fait la rotation
-    SDL_Event event;
-    int test_rota = 0;
-    do
-    {
-        SDL_WaitEvent(&event);
-        switch (event.type)
-        {
-        case SDL_QUIT:
-            break;
-        case SDL_WINDOWEVENT:
-            //test changement d'image;
-            if (event.window.event == SDL_WINDOWEVENT_RESIZED && !test_rota)
-            {
-                //rotation actuel;
-                int rota = SDL_RenderCopyEx(renderer, texture, NULL,
-                    NULL, -atoi(argv[2]), NULL, SDL_FLIP_NONE);
-                if (rota)
-                {
-                    errx(EXIT_FAILURE, "%s", SDL_GetError());
-                }
-                SDL_RenderPresent(renderer);
-                test_rota = 1;
-            }
-            break;
-        }
-    }while(!test_rota);
+    event_loop(renderer, texture, argv[2]);
 
     //save l'image dans un new fichier;
-    SDL_SetRenderTarget(renderer, texture);
-    SDL_QueryTexture(texture, NULL, NULL, &w, &h);
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, w, 
-        h, 32, 0, 0, 0, 0);
-    SDL_RenderReadPixels(renderer, NULL, surface->format->format, 
-        surface->pixels, surface->pitch);
-    char* outName = argv[1];
-    outName = strcat("result_", outName);
-    IMG_SavePNG(surface, outName);
-    printf("!");
-    SDL_FreeSurface(surface);
-    printf("2");
-    SDL_Texture* target = SDL_GetRenderTarget(renderer);
-    SDL_SetRenderTarget(renderer, target);
+    //SDL_SetRenderTarget(renderer, texture);
+    //SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+    //SDL_Surface* surface = SDL_CreateRGBSurface(0, w, 
+        //h, 32, 0, 0, 0, 0);
+    //SDL_RenderReadPixels(renderer, NULL, surface->format->format, 
+        //surface->pixels, surface->pitch);
+    //char* outName = argv[1];
+    //outName = strcat("result_", outName);
+    //IMG_SavePNG(surface, outName);
+    //SDL_FreeSurface(surface);
+    //SDL_Texture* target = SDL_GetRenderTarget(renderer);
+    //SDL_SetRenderTarget(renderer, target);
 
-    //D?gage le SDL
-    SDL_DestroyTexture(texture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    //Enleve le SDL
+    //SDL_DestroyTexture(texture);
+    //SDL_DestroyRenderer(renderer);
+    //SDL_DestroyWindow(window);
+    //SDL_Quit();
 
-    return EXIT_SUCCESS;
+    //return EXIT_SUCCESS;
 }
+
+
