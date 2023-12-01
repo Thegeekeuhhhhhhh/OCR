@@ -155,10 +155,15 @@ Matrix *feedforward_algo(NeuralNetwork *nn, double inputs[], size_t len)
     // Acvtivation
     matrix_apply_function_in_place(output, sigmoid);
 
-    matrix_free(inputMatrix);
-    matrix_free(hidden1);
-    matrix_free(hidden2);
 
+    free(inputMatrix->data);
+    free(hidden1->data);
+    free(hidden2->data);
+    
+    free(inputMatrix);
+    free(hidden1);
+    free(hidden2);
+    
     return output;
 }
 
@@ -228,8 +233,9 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     // Matrix *transposed_matrix = matrix_transpose(nn->hidden_outputWeights);
     // And then, computes the dot product of this transposed matrix with
     // the errors found for the output layer to find the hidden layer errors
+    Matrix *transposed_h2_oWeights = matrix_transpose(nn->hidden2_outputWeights);
     Matrix *hidden2Layer_error = matrix_dot_product(
-            matrix_transpose(nn->hidden2_outputWeights), outputLayer_error);
+            transposed_h2_oWeights, outputLayer_error);
 
     Matrix *gradient_h2 = matrix_apply_function(
             hidden2, simpledsigmoid);
@@ -249,8 +255,9 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
 
 
     // FINAL STEP
+    Matrix *transposed_h1_h2Weights = matrix_transpose(nn->hidden1_hidden2Weights);
     Matrix *hidden1Layer_error = matrix_dot_product(
-            matrix_transpose(nn->hidden1_hidden2Weights), hidden2Layer_error);
+            transposed_h1_h2Weights, hidden2Layer_error);
 
     Matrix *gradient_h1 = matrix_apply_function(
             hidden1, simpledsigmoid);
@@ -269,23 +276,52 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     matrix_add_in_place(nn->input_hidden1Weights, dinput_hidden1Weights);
     matrix_add_in_place(nn->hidden1_biases, gradient_h1);
 
-
-
-
     // Frees the Matrixes
-    matrix_free(inputMatrix);
-    matrix_free(hidden1);
-    matrix_free(hidden2);
-    //matrix_free(output);
-    //matrix_free(outputLayer_error); 
-    //matrix_free(gradient);
-    //matrix_free(transposed_hidden1);
-    //matrix_free(transposed_hidden2);
-    //matrix_free(dhidden2_outputWeights); 
-    //matrix_free(hiddenLayer_error);
-    //matrix_free(hiddenLayer_gradient); 
-    //matrix_free(transposed_input);
-    matrix_free(dinput_hidden1Weights);
+
+    /*
+    free(transposed_h1_h2Weights->data);
+    free(transposed_h2_oWeights->data);
+    free(dhidden2_outputWeights->data);
+    free(dhidden1_hidden2Weights->data);
+    free(dinput_hidden1Weights->data);
+    free(outputLayer_error->data);
+    free(hidden2Layer_error->data);
+    free(hidden1Layer_error->data);
+    
+    
+    //free(gradient_out->data); 
+    free(gradient_h2->data);
+    free(gradient_h1->data);
+    free(transposed_hidden1->data);
+    free(transposed_hidden2->data);
+    
+    
+    free(transposed_h1_h2Weights);
+    free(transposed_h2_oWeights);
+    free(dhidden2_outputWeights);
+    free(dhidden1_hidden2Weights);
+    free(dinput_hidden1Weights);
+    free(outputLayer_error);
+    free(hidden2Layer_error);
+    free(hidden1Layer_error);
+    */
+/*    
+    free(gradient_out);
+    free(gradient_h2);
+    free(gradient_h1);
+    free(transposed_input);
+    free(transposed_hidden1);
+    free(transposed_hidden2);
+    
+    free(inputMatrix->data);    
+    free(hidden1->data);
+    free(hidden2->data);
+    free(inputMatrix);    
+    free(hidden1);
+    free(hidden2);
+    //free(output->data);
+    free(output);
+  */  
 
 
     // Now, we have to compute infinitesimal values
@@ -459,30 +495,26 @@ int main(int argc, char** argv)
 
         printf("Training n°%li :\n", tx);
         printf("----------------------------------------------------\n");
-        Matrix *test = feedforward_algo(nn, t1, 2);
+        Matrix *test1 = feedforward_algo(nn, t1, 2);
         printf("| Inputs : 0 0 | Outputs : %lf | Expected : 0 |\n"
-                , matrix_get(test, 0, 0));
-
-        //matrix_free(test);
-        test = feedforward_algo(nn, t2, 2);
+                , matrix_get(test1, 0, 0));
+        //free(test1);
+        
+        Matrix *test2 = feedforward_algo(nn, t2, 2);
         printf("| Inputs : 1 0 | Outputs : %lf | Expected : 1 |\n"
-                , matrix_get(test, 0, 0));
-
-        //matrix_free(test);
-        test = feedforward_algo(nn, t3, 2);
+                , matrix_get(test2, 0, 0));
+        //free(test2);
+        
+        Matrix *test3 = feedforward_algo(nn, t3, 2);
         printf("| Inputs : 0 1 | Outputs : %lf | Expected : 1 |\n"
-                , matrix_get(test, 0, 0));
+                , matrix_get(test3, 0, 0));
+        //free(test3);
 
-        //matrix_free(test);
-        test = feedforward_algo(nn, t4, 2);
+        Matrix *test4 = feedforward_algo(nn, t4, 2);
         printf("| Inputs : 1 1 | Outputs : %lf | Expected : 0 |\n"
-                , matrix_get(test, 0, 0));
+                , matrix_get(test4, 0, 0));
         printf("----------------------------------------------------\n");
-
-        //matrix_free(test);
-
-
-
+        //free(test4);
 
         if (tx == ite)
         {

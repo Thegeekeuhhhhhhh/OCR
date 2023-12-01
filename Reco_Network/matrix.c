@@ -40,7 +40,7 @@ void matrix_identity(Matrix *m, size_t size)
     {
         errx(1, "Size must be > 1 for identity function [Matrix lib]");
     }
-    matrix_free_data(m);
+    free(m->data);
     matrix_init(m, size, size);
     for (size_t i = 0; i < size; i++)
     {

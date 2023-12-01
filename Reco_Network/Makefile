@@ -1,7 +1,7 @@
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -fsanitize=address
-LDFLAGS = -lm -fsanitize=address
+CFLAGS = -Wall -Wextra
+LDFLAGS = -lm
 
 all: neuralnetwork
 
