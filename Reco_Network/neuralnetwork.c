@@ -1,5 +1,8 @@
 #include "neuralnetwork.h"
 #include "matrix.h"
+#include <SDL.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hidden1Number,
 	size_t hidden2Number, size_t outputNumber, double learning_rate)
@@ -167,6 +170,17 @@ Matrix *feedforward_algo(NeuralNetwork *nn, double inputs[], size_t len)
     return output;
 }
 
+/*
+void matrix_free(Matrix *m)
+{
+    if (m != NULL)
+    {
+        free(m->data);
+        free(m);
+    }
+}
+*/
+
 void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
 {
     Matrix *inputMatrix = malloc(sizeof(Matrix));
@@ -278,51 +292,54 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
 
     // Frees the Matrixes
 
-    /*
-    free(transposed_h1_h2Weights->data);
-    free(transposed_h2_oWeights->data);
-    free(dhidden2_outputWeights->data);
-    free(dhidden1_hidden2Weights->data);
-    free(dinput_hidden1Weights->data);
-    free(outputLayer_error->data);
-    free(hidden2Layer_error->data);
-    free(hidden1Layer_error->data);
+
     
+    matrix_free(transposed_h2_oWeights);
+    matrix_free(transposed_h1_h2Weights);
+    matrix_free(dhidden2_outputWeights);
+    matrix_free(dhidden1_hidden2Weights);
+    matrix_free(dinput_hidden1Weights);
+    
+    
+    //matrix_free(outputLayer_error);
+    matrix_free(hidden2Layer_error);
+    matrix_free(hidden1Layer_error);
+
+    
+    //matrix_free(gradient_h1);
+    //matrix_free(gradient_h2);
+    //matrix_free(gradient_out);
+
+    /*
+    matrix_free(transposed_hidden1);
+    matrix_free(transposed_hidden2); 
+    */
+    
+    /*
+    //matrix_free(inputMatrix);
+    matrix_free(hidden1);
+    matrix_free(hidden2);
+    //matrix_free(output);
+    */
+    
+
+
+
+    /*
+    free(outputLayer_error->data); 
     
     //free(gradient_out->data); 
-    free(gradient_h2->data);
-    free(gradient_h1->data);
-    free(transposed_hidden1->data);
-    free(transposed_hidden2->data);
-    
-    
-    free(transposed_h1_h2Weights);
-    free(transposed_h2_oWeights);
-    free(dhidden2_outputWeights);
-    free(dhidden1_hidden2Weights);
-    free(dinput_hidden1Weights);
-    free(outputLayer_error);
-    free(hidden2Layer_error);
-    free(hidden1Layer_error);
-    */
-/*    
-    free(gradient_out);
-    free(gradient_h2);
-    free(gradient_h1);
-    free(transposed_input);
-    free(transposed_hidden1);
-    free(transposed_hidden2);
-    
-    free(inputMatrix->data);    
-    free(hidden1->data);
-    free(hidden2->data);
-    free(inputMatrix);    
-    free(hidden1);
-    free(hidden2);
-    //free(output->data);
-    free(output);
-  */  
 
+    free(outputLayer_error);
+
+    free(gradient_out);
+    free(transposed_input);
+   
+    
+    free(output->data);
+    free(output);
+    */
+    
 
     // Now, we have to compute infinitesimal values
     // Formulas :
@@ -402,14 +419,50 @@ int main(int argc, char** argv)
     temp = *p;
     learning_rate = strtod(temp, NULL);
 
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        errx(1, "Erreur d'initialisation de SDL");
+        return -1;
+    }
+    SDL_Surface* surface = IMG_Load("dataset/0/img_1.jpg");
+    if (!surface)
+    {
+        errx(1, "Erreur de chargement de l'image");
+        SDL_Quit();
+        return -1;
+    }
+
+    Uint32 *pixels = (Uint32 *)surface->pixels;
+
+    for (size_t i = 0; i < 28; i++)
+    {
+        for (size_t j = 0; j < 28; j++)
+        {
+            Uint8 r, g, b;
+	        SDL_GetRGB(pixels[i*28+j], surface->format, &r, &g, &b);
+            double average = 0.33*r + 0.33*g + 0.33*b;
+            if (average <= 127)
+            {
+                printf("0");
+            }
+            else
+            {
+                printf("1");
+            }
+                   
+        }
+        printf("\n");
+    }
 
 
-    double t1[] = { 0.0f, 0.0f };
-    double t2[] = { 1.0f, 0.0f };
-    double t3[] = { 0.0f, 1.0f };
-    double t4[] = { 1.0f, 1.0f };
 
 
+    //double t1[] = { 0.0f, 0.0f };
+    //double t2[] = { 1.0f, 0.0f };
+    //double t3[] = { 0.0f, 1.0f };
+    //double t4[] = { 1.0f, 1.0f };
+
+    
 
     for (size_t tx = 1; tx < ite+1; tx++)
     {
@@ -431,6 +484,7 @@ int main(int argc, char** argv)
         // printf("\n");
 
 
+        
         double inputs[4][2] =
         { 
             { 0.0f, 0.0f },
@@ -445,6 +499,7 @@ int main(int argc, char** argv)
             { 1.0f },
             { 0.0f }
         };
+        
 
         // Converts wantedOutputs into a Matrix
         Matrix *wantedOutputsMatrix = malloc(sizeof(Matrix));
@@ -491,8 +546,10 @@ int main(int argc, char** argv)
             }
         }
 
-        //separator();
+        SDL_FreeSurface(surface);
 
+        //separator();
+        /*
         printf("Training n°%li :\n", tx);
         printf("----------------------------------------------------\n");
         Matrix *test1 = feedforward_algo(nn, t1, 2);
@@ -579,6 +636,7 @@ int main(int argc, char** argv)
 
             fclose(fileptr);
         }
+        */
 
 
 
@@ -588,5 +646,6 @@ int main(int argc, char** argv)
         free_network(nn);
     }
 
+    SDL_Quit();
     return 0;
 }

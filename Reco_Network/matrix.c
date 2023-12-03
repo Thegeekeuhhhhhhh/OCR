@@ -13,6 +13,7 @@ void matrix_init(Matrix *m, size_t row, size_t col)
     m->row = row;
     m->col = col;
     m->data = malloc(row * col * sizeof(double));
+    //printf("%p\n", m->data);
     m->dataLen = row * col;
     for (size_t i = 0; i < m->dataLen; i++)
     {
@@ -27,8 +28,11 @@ void matrix_free_data(Matrix *m)
 
 void matrix_free(Matrix *m)
 {
-    free(m->data);
-    free(m);
+    if (m != NULL)
+    {
+        free(m->data);
+        free(m);
+    }
 }
 
 void matrix_identity(Matrix *m, size_t size)
@@ -381,9 +385,9 @@ double arround(double val)
 void matrix_output_print(Matrix *m)
 {
     /*
-     Prints the matrix m in a beautiful way, and prints the output rounded
-     to 0 or 1
-     */
+       Prints the matrix m in a beautiful way, and prints the output rounded
+       to 0 or 1
+       */
     for (size_t i = 0; i < m->row; i++)
     {
         printf("|");
