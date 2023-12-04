@@ -468,19 +468,27 @@ int main(int argc, char** argv)
         for (size_t j = 0; j < 28; j++)
         {
             Uint8 r, g, b;
+            /*
+            r = (sur_pixels[i*w+j] & 0x00ff0000) >> 16;
+            g = (sur_pixels[i*w+j] & 0x0000ff00) >> 8;
+            b = sur_pixels[i*w+j] & 0x000000ff;
+            Uint8 grayscale = r*0.299 + g*0.587 + b*0.114;
+            pixels[i][j] = grayscale;
+            */
             SDL_GetRGB(pixels[i*28+j], surface->format, &r, &g, &b);
             double average = 0.33*r + 0.33*g + 0.33*b;
             if (average >= 0)
             {
-                printf("|%03i|", (int)average);
+                //printf("|%03i|", (int)average);
                 //printf("|%03i|%03i|%03i|", (int)r, (int)g, (int)b);
             }
             else
             {
                 printf("0");
             }
+            surface->pixels[i*28+j] = 255;
         }
-        printf("\n\n");
+        //printf("\n\n");
     }
 
     //double t1[] = { 0.0f, 0.0f };
