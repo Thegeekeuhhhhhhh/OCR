@@ -5,7 +5,7 @@
 #include <SDL2/SDL_image.h>
 
 void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hidden1Number,
-	size_t hidden2Number, size_t outputNumber, double learning_rate)
+        size_t hidden2Number, size_t outputNumber, double learning_rate)
 {
     nn->lr = learning_rate;
     nn->inputNodes = inputNumber;
@@ -63,9 +63,9 @@ void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hidden1Number,
     // This is a single column matrix
 
     for (size_t i = 0; i < nn->hidden1_biases->row; i++)
-    {             
+    {
         double temp = ((double)rand()) / ((double)RAND_MAX);
-        matrix_set(nn->hidden1_biases, i, 0, temp);                
+        matrix_set(nn->hidden1_biases, i, 0, temp);
     }
 
 
@@ -74,9 +74,9 @@ void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hidden1Number,
     // This is a single column matrix
 
     for (size_t i = 0; i < nn->hidden2_biases->row; i++)
-    {             
+    {
         double temp = ((double)rand()) / ((double)RAND_MAX);
-        matrix_set(nn->hidden2_biases, i, 0, temp);                
+        matrix_set(nn->hidden2_biases, i, 0, temp);
     }
 
     nn->output_biases = malloc(sizeof(Matrix));
@@ -87,7 +87,7 @@ void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hidden1Number,
     {
         double temp = ((double)rand()) / ((double)RAND_MAX);
         matrix_set(nn->output_biases, i, 0, temp);
-    }						    
+    }
 }
 
 void free_network(NeuralNetwork *nn)
@@ -162,24 +162,24 @@ Matrix *feedforward_algo(NeuralNetwork *nn, double inputs[], size_t len)
     free(inputMatrix->data);
     free(hidden1->data);
     free(hidden2->data);
-    
+
     free(inputMatrix);
     free(hidden1);
     free(hidden2);
-    
+
     return output;
 }
 
 /*
-void matrix_free(Matrix *m)
-{
-    if (m != NULL)
-    {
-        free(m->data);
-        free(m);
-    }
-}
-*/
+   void matrix_free(Matrix *m)
+   {
+   if (m != NULL)
+   {
+   free(m->data);
+   free(m);
+   }
+   }
+   */
 
 void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
 {
@@ -293,53 +293,53 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     // Frees the Matrixes
 
 
-    
+
     matrix_free(transposed_h2_oWeights);
     matrix_free(transposed_h1_h2Weights);
     matrix_free(dhidden2_outputWeights);
     matrix_free(dhidden1_hidden2Weights);
     matrix_free(dinput_hidden1Weights);
-    
-    
+
+
     //matrix_free(outputLayer_error);
     matrix_free(hidden2Layer_error);
     matrix_free(hidden1Layer_error);
 
-    
+
     //matrix_free(gradient_h1);
     //matrix_free(gradient_h2);
     //matrix_free(gradient_out);
 
     /*
-    matrix_free(transposed_hidden1);
-    matrix_free(transposed_hidden2); 
-    */
-    
+       matrix_free(transposed_hidden1);
+       matrix_free(transposed_hidden2);
+       */
+
     /*
     //matrix_free(inputMatrix);
     matrix_free(hidden1);
     matrix_free(hidden2);
     //matrix_free(output);
     */
-    
+
 
 
 
     /*
-    free(outputLayer_error->data); 
-    
-    //free(gradient_out->data); 
+       free(outputLayer_error->data);
+
+    //free(gradient_out->data);
 
     free(outputLayer_error);
 
     free(gradient_out);
     free(transposed_input);
-   
-    
+
+
     free(output->data);
     free(output);
     */
-    
+
 
     // Now, we have to compute infinitesimal values
     // Formulas :
@@ -353,7 +353,7 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     //          [DOT_PROD] transposed(hidden_layer)
     //
     // dW_i->h (delta weight fron input layer to hidden layer)
-    //         = lr * hidden_error * dsigmoid(hidden) 
+    //         = lr * hidden_error * dsigmoid(hidden)
     //         [DOT_PROD] transposed(input_layer)
     //
     // Do not forget that this is BACKPROPAGATION, later, if we need another
@@ -375,7 +375,7 @@ int main(int argc, char** argv)
 {
     if (argc != 4)
     {
-        errx(1, 
+        errx(1,
                 "\nUsage :\n./neuralnetwork [Number of trainings] [EPOCHS] [Learning rate]"
             );
     }
@@ -424,7 +424,8 @@ int main(int argc, char** argv)
         errx(1, "Erreur d'initialisation de SDL");
         return -1;
     }
-    SDL_Surface* surface = IMG_Load("dataset/0/img_1.jpg");
+
+    SDL_Surface* surface = IMG_Load("dataset/1/img_12.jpg");
     if (!surface)
     {
         errx(1, "Erreur de chargement de l'image");
@@ -432,37 +433,61 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    Uint32 *pixels = (Uint32 *)surface->pixels;
 
+    /*
+    // Creates window
+    SDL_Window* window = SDL_CreateWindow("LA FONCTION DE LEO",
+            0, 0, 280, 280, 0);
+    if (window == NULL)
+    {
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    }
+
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL)
+    {
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    }
+
+    SDL_Texture* texture = IMG_LoadTexture(renderer, "dataset/1/img_0.jpg");
+    int lenx;
+    int leny;
+
+    if (SDL_QueryTexture(texture, NULL, NULL, &lenx, &leny) != 0)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    */
+
+
+    Uint32 *pixels = surface->pixels;
     for (size_t i = 0; i < 28; i++)
     {
         for (size_t j = 0; j < 28; j++)
         {
             Uint8 r, g, b;
-	        SDL_GetRGB(pixels[i*28+j], surface->format, &r, &g, &b);
+            SDL_GetRGB(pixels[i*28+j], surface->format, &r, &g, &b);
             double average = 0.33*r + 0.33*g + 0.33*b;
-            if (average <= 127)
+            if (average >= 0)
             {
-                printf("0");
+                printf("|%03i|", (int)average);
+                //printf("|%03i|%03i|%03i|", (int)r, (int)g, (int)b);
             }
             else
             {
-                printf("1");
+                printf("0");
             }
-                   
         }
-        printf("\n");
+        printf("\n\n");
     }
-
-
-
 
     //double t1[] = { 0.0f, 0.0f };
     //double t2[] = { 1.0f, 0.0f };
     //double t3[] = { 0.0f, 1.0f };
     //double t4[] = { 1.0f, 1.0f };
 
-    
 
     for (size_t tx = 1; tx < ite+1; tx++)
     {
@@ -484,9 +509,9 @@ int main(int argc, char** argv)
         // printf("\n");
 
 
-        
+
         double inputs[4][2] =
-        { 
+        {
             { 0.0f, 0.0f },
             { 1.0f, 0.0f },
             { 0.0f, 1.0f },
@@ -499,7 +524,7 @@ int main(int argc, char** argv)
             { 1.0f },
             { 0.0f }
         };
-        
+
 
         // Converts wantedOutputs into a Matrix
         Matrix *wantedOutputsMatrix = malloc(sizeof(Matrix));
@@ -532,7 +557,7 @@ int main(int argc, char** argv)
                 // matrix_set(wantedOutputsMatrix, i, j, temp);
                 // }
                 // }
-                // 
+                //
 
 
                 //matrix_print(wantedOutputsMatrix);
@@ -546,106 +571,108 @@ int main(int argc, char** argv)
             }
         }
 
-        SDL_FreeSurface(surface);
 
         //separator();
         /*
-        printf("Training n°%li :\n", tx);
-        printf("----------------------------------------------------\n");
-        Matrix *test1 = feedforward_algo(nn, t1, 2);
-        printf("| Inputs : 0 0 | Outputs : %lf | Expected : 0 |\n"
-                , matrix_get(test1, 0, 0));
+           printf("Training n°%li :\n", tx);
+           printf("----------------------------------------------------\n");
+           Matrix *test1 = feedforward_algo(nn, t1, 2);
+           printf("| Inputs : 0 0 | Outputs : %lf | Expected : 0 |\n"
+           , matrix_get(test1, 0, 0));
         //free(test1);
-        
+
         Matrix *test2 = feedforward_algo(nn, t2, 2);
         printf("| Inputs : 1 0 | Outputs : %lf | Expected : 1 |\n"
-                , matrix_get(test2, 0, 0));
+        , matrix_get(test2, 0, 0));
         //free(test2);
-        
+
         Matrix *test3 = feedforward_algo(nn, t3, 2);
         printf("| Inputs : 0 1 | Outputs : %lf | Expected : 1 |\n"
-                , matrix_get(test3, 0, 0));
+        , matrix_get(test3, 0, 0));
         //free(test3);
 
         Matrix *test4 = feedforward_algo(nn, t4, 2);
         printf("| Inputs : 1 1 | Outputs : %lf | Expected : 0 |\n"
-                , matrix_get(test4, 0, 0));
+        , matrix_get(test4, 0, 0));
         printf("----------------------------------------------------\n");
         //free(test4);
 
         if (tx == ite)
         {
-            // Save the data of the neural network in a file
-            FILE *fileptr = NULL;
-            fileptr = fopen("Values.txt", "w");
-            fprintf(fileptr, "Input to hidden 1 layer Weights :\n");
-            for (size_t i = 0; i < nn->inputNodes; i++)
-            {
-                fprintf(fileptr, "|");
-                for (size_t j = 0; j < nn->hidden1Nodes; j++)
-                {
-                    double temp = matrix_get(nn->input_hidden1Weights, i, j);
-                    fprintf(fileptr, "%lf\t|", temp);
-                }
-                fprintf(fileptr, "\n");
-            }
-
-            fprintf(fileptr, "\nHidden 1 layer biases :\n");
-            for (size_t i = 0; i < nn->hidden1_biases->row; i++)
-            {
-                double temp = matrix_get(nn->hidden1_biases, i, 0);
-                fprintf(fileptr, "|%lf\t|\n", temp);
-            }
-
-            fprintf(fileptr, "\nHidden 1 to hidden 2 layer Weights :\n");
-            for (size_t i = 0; i < nn->hidden1Nodes; i++)
-            {
-                fprintf(fileptr, "|");
-                for (size_t j = 0; j < nn->hidden2Nodes; j++)
-                {
-                    double temp = matrix_get(nn->hidden1_hidden2Weights, i, j);
-                    fprintf(fileptr, "%lf\t|", temp);
-                }
-                fprintf(fileptr, "\n");
-            }
-            fprintf(fileptr, "\nHidden 2 layer biases :\n");
-            for (size_t i = 0; i < nn->hidden2_biases->row; i++)
-            {
-                double temp = matrix_get(nn->hidden2_biases, i, 0);
-                fprintf(fileptr, "|%lf\t|\n", temp);
-            }
-
-            fprintf(fileptr, "\nHidden 2 to output layer Weights :\n");
-            for (size_t i = 0; i < nn->hidden2Nodes; i++)
-            {
-                fprintf(fileptr, "|");
-                for (size_t j = 0; j < nn->outputNodes; j++)
-                {
-                    double temp = matrix_get(nn->hidden2_outputWeights, i, j);
-                    fprintf(fileptr, "%lf\t|", temp);
-                }
-                fprintf(fileptr, "\n");
-            }
-            fprintf(fileptr, "\nOutput layer biases :\n");
-            for (size_t i = 0; i < nn->output_biases->row; i++)
-            {
-                double temp = matrix_get(nn->output_biases, i, 0);
-                fprintf(fileptr, "|%lf\t|\n", temp);
-            }
-
-
-            fclose(fileptr);
+        // Save the data of the neural network in a file
+        FILE *fileptr = NULL;
+        fileptr = fopen("Values.txt", "w");
+        fprintf(fileptr, "Input to hidden 1 layer Weights :\n");
+        for (size_t i = 0; i < nn->inputNodes; i++)
+        {
+        fprintf(fileptr, "|");
+        for (size_t j = 0; j < nn->hidden1Nodes; j++)
+        {
+        double temp = matrix_get(nn->input_hidden1Weights, i, j);
+        fprintf(fileptr, "%lf\t|", temp);
         }
-        */
+        fprintf(fileptr, "\n");
+        }
+
+        fprintf(fileptr, "\nHidden 1 layer biases :\n");
+        for (size_t i = 0; i < nn->hidden1_biases->row; i++)
+        {
+        double temp = matrix_get(nn->hidden1_biases, i, 0);
+        fprintf(fileptr, "|%lf\t|\n", temp);
+        }
+
+        fprintf(fileptr, "\nHidden 1 to hidden 2 layer Weights :\n");
+        for (size_t i = 0; i < nn->hidden1Nodes; i++)
+        {
+        fprintf(fileptr, "|");
+        for (size_t j = 0; j < nn->hidden2Nodes; j++)
+        {
+        double temp = matrix_get(nn->hidden1_hidden2Weights, i, j);
+        fprintf(fileptr, "%lf\t|", temp);
+        }
+        fprintf(fileptr, "\n");
+        }
+        fprintf(fileptr, "\nHidden 2 layer biases :\n");
+        for (size_t i = 0; i < nn->hidden2_biases->row; i++)
+        {
+        double temp = matrix_get(nn->hidden2_biases, i, 0);
+        fprintf(fileptr, "|%lf\t|\n", temp);
+        }
+
+        fprintf(fileptr, "\nHidden 2 to output layer Weights :\n");
+        for (size_t i = 0; i < nn->hidden2Nodes; i++)
+        {
+        fprintf(fileptr, "|");
+        for (size_t j = 0; j < nn->outputNodes; j++)
+        {
+            double temp = matrix_get(nn->hidden2_outputWeights, i, j);
+            fprintf(fileptr, "%lf\t|", temp);
+        }
+        fprintf(fileptr, "\n");
+    }
+    fprintf(fileptr, "\nOutput layer biases :\n");
+    for (size_t i = 0; i < nn->output_biases->row; i++)
+    {
+        double temp = matrix_get(nn->output_biases, i, 0);
+        fprintf(fileptr, "|%lf\t|\n", temp);
+    }
+
+
+    fclose(fileptr);
+    }
+    */
 
 
 
 
         // Frees malloced variables
         matrix_free(wantedOutputsMatrix);
-        free_network(nn);
+    free_network(nn);
     }
 
+
+    SDL_SaveBMP(surface, "somefile.bmp");
+    SDL_FreeSurface(surface);
     SDL_Quit();
     return 0;
 }
