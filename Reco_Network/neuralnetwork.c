@@ -461,35 +461,32 @@ int main(int argc, char** argv)
     SDL_DestroyWindow(window);
     */
 
+    //SDL_LockSurface(surface);
 
-    Uint32 *pixels = surface->pixels;
-    for (size_t i = 0; i < 28; i++)
+    Uint32 *pixels = (Uint32 *)surface->pixels;
+    for (size_t i = 0; i < surface->h; i++)
     {
-        for (size_t j = 0; j < 28; j++)
+        for (size_t j = 0; j < surface->w; j++)
         {
             Uint8 r, g, b;
-            /*
-            r = (sur_pixels[i*w+j] & 0x00ff0000) >> 16;
-            g = (sur_pixels[i*w+j] & 0x0000ff00) >> 8;
-            b = sur_pixels[i*w+j] & 0x000000ff;
-            Uint8 grayscale = r*0.299 + g*0.587 + b*0.114;
-            pixels[i][j] = grayscale;
-            */
-            SDL_GetRGB(pixels[i*28+j], surface->format, &r, &g, &b);
-            double average = 0.33*r + 0.33*g + 0.33*b;
-            if (average >= 0)
+            printf("%li ", i*28+j);
+            SDL_GetRGB(pixels[i * 28 + j], surface->format, &r, &g, &b);
+            double average = 0.3*r + 0.59*g + 0.11*b;
+            if (g >= 100)
             {
-                //printf("|%03i|", (int)average);
-                //printf("|%03i|%03i|%03i|", (int)r, (int)g, (int)b);
+                printf("1 ");
             }
             else
             {
-                printf("0");
+                printf("0 ");
             }
-            surface->pixels[i*28+j] = 255;
         }
-        //printf("\n\n");
+        printf("\n");
     }
+
+    SDL_SaveBMP(surface, "somefile.bmp");
+    SDL_FreeSurface(surface);
+    //SDL_UnlockSurface(surface);
 
     //double t1[] = { 0.0f, 0.0f };
     //double t2[] = { 1.0f, 0.0f };
@@ -679,8 +676,6 @@ int main(int argc, char** argv)
     }
 
 
-    SDL_SaveBMP(surface, "somefile.bmp");
-    SDL_FreeSurface(surface);
     SDL_Quit();
     return 0;
 }
