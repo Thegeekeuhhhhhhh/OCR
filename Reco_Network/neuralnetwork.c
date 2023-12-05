@@ -424,295 +424,113 @@ int main(int argc, char** argv)
         return -1;
     }
 
-
-    /*
-       SDL_Surface* tmpSurface = IMG_Load("dataset/1/1.jpg");
-       if (tmpSurface == NULL)
-       {
-       errx(1, "Quoicouprout");
-       }
-       SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface,
-       SDL_PIXELFORMAT_RGB888, 0);
-
-       SDL_FreeSurface(tmpSurface);
-       tmpSurface = NULL;
-
-       if(surface == NULL)
-       {
-       SDL_FreeSurface(tmpSurface);
-       errx(1, "AMPANYANE");
-       }
-
-       Uint32* pixels = surface->pixels;
-       for(int i = 0; i < surface->h; i++)
-       {
-       for(int j = 0; j < surface->w; j++)
-       {
-       Uint8 r, g, b;
-       SDL_GetRGB(pixels[i*surface->w + j], surface->format, &r, &g, &b);
-       if(r > 100)
-       {
-       printf("1 ");
-       }
-       else
-       {
-       printf("0 ");
-       }
-       }
-       printf("\n");
-       }
-
-       SDL_FreeSurface(surface);
-       surface = NULL;
-       */
-
-
-
-
-
-
-
-    /*
-    // Creates window
-    SDL_Window* window = SDL_CreateWindow("LA FONCTION DE LEO",
-    0, 0, 280, 280, 0);
-    if (window == NULL)
-    {
-    errx(EXIT_FAILURE, "%s", SDL_GetError());
-    }
-
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == NULL)
-    {
-    errx(EXIT_FAILURE, "%s", SDL_GetError());
-    }
-
-    SDL_Texture* texture = IMG_LoadTexture(renderer, "dataset/1/img_0.jpg");
-    int lenx;
-    int leny;
-
-    if (SDL_QueryTexture(texture, NULL, NULL, &lenx, &leny) != 0)
-    errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    */
-
-    //SDL_LockSurface(surface);
-
-
-    //SDL_SaveBMP(surface, "somefile.bmp");
-    //SDL_FreeSurface(surface);
-    //SDL_UnlockSurface(surface);
-
-
-
-
-    //double t1[] = { 0.0f, 0.0f };
-    //double t2[] = { 1.0f, 0.0f };
-    //double t3[] = { 0.0f, 1.0f };
-    //double t4[] = { 1.0f, 1.0f };
-
-
-    double inputs[10][784];
-    double wantedOutputs[10][10];
+    double inputs[90][784];
+    double wantedOutputs[90][10];
 
     for (size_t tx = 1; tx < ite+1; tx++)
     {
         NeuralNetwork *nn = malloc(sizeof(NeuralNetwork));
-        size_t NumberOfOutputs = 10;
         init_network(nn, 784, 16, 16, 10, learning_rate);
-        // Nodes needed to let XOR AI work
-        // Input layer : 2 Nodes
-        // Hidden layer(s) : 2 Nodes
-        // Output layer : 1 Node
 
-
-        //double input[] = {1, 0};
-        //Matrix *m = feedforward_algo(nn, input, 2);
-        //for (size_t i = 0; i < m->dataLen; i++)
-        // {
-        //printf("%f ", m->data[i]);
-        // }
-        // printf("\n");
-
-
-
-        /* 
-           double inputs[4][2] =
-           {
-           { 0.0f, 0.0f },
-           { 1.0f, 0.0f },
-           { 0.0f, 1.0f },
-           { 1.0f, 1.0f }
-           };
-           double wantedOutputs[4][1] =
-           {
-           { 0.0f },
-           { 1.0f },
-           { 1.0f },
-           { 0.0f }
-           };
-           */
-
-        //double inputs[10][784];
-        //double wantedOutputs[10][10]; Premier 10 = nb inputs, autre 10 = nb sorties possibles
-
-        for (int index = 1; index <= 10; index++)
+        int max = 45;
+        for (int chapter = 1; chapter <= 2; chapter++)
         {
-            char str[60];
-            sprintf(str, "handwritten_digits/1/%i.jpg", index);
-            //printf("%s\n", str);
-
-            SDL_Surface* tmpSurface = IMG_Load(str);
-            if (tmpSurface == NULL)
+            for (int index = 1; index <= max; index++)
             {
-                errx(1, "Quoicouprout");
-            }
-            SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface,
-                    SDL_PIXELFORMAT_RGB888, 0);
+                char str[45];
+                sprintf(str, "handwritten_digits/%i/%i.jpg", chapter, index);
+                //printf("%s\n", str);
 
-            SDL_FreeSurface(tmpSurface);
-            tmpSurface = NULL;
+                SDL_Surface* tmpSurface = IMG_Load(str);
+                if (tmpSurface == NULL)
+                {
+                    errx(1, "Quoicouprout");
+                }
+                SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface,
+                        SDL_PIXELFORMAT_RGB888, 0);
 
-            if(surface == NULL)
-            {
                 SDL_FreeSurface(tmpSurface);
-                errx(1, "AMPANYANE");
-            }
+                tmpSurface = NULL;
+                if(surface == NULL)
+                {
+                    SDL_FreeSurface(tmpSurface);
+                    errx(1, "AMPANYANE");
+                }
 
-            Uint32 *pixels = surface->pixels;
-            for (size_t f = 0; f < 784; f++)
-            {
-                Uint8 r, g, b;
-                SDL_GetRGB(pixels[f], surface->format, &r, &g, &b);
-                inputs[index-1][f] = 0.32*r + 0.57*g + 0.11*b;
+                Uint32 *pixels = surface->pixels;
+                for (size_t f = 0; f < 784; f++)
+                {
+                    Uint8 r, g, b;
+                    SDL_GetRGB(pixels[f], surface->format, &r, &g, &b);
+                    inputs[(chapter-1)*max + index-1][f] = 0.32*r + 0.57*g + 0.11*b;
+                }
+                
+                for (size_t o = 0; o < 10; o++)
+                {
+                    wantedOutputs[(chapter-1) * max + index-1][o] = 0.0f;
+                }
+                wantedOutputs[(chapter-1) * max + index-1][chapter] = 1.0f;
+                SDL_FreeSurface(surface);
+                surface = NULL;
             }
-
-            wantedOutputs[index-1][0] = 0.0f;
-            wantedOutputs[index-1][1] = 1.0f; // On ne test qu avec des 1 pour le moment
-            for (size_t o = 2; o < 10; o++)
-            {
-                wantedOutputs[index-1][o] = 0.0f;
-            }
-
-            SDL_FreeSurface(surface);
-            surface = NULL;
         }
-
-        /*
-           Uint32* pixels = surface->pixels;
-           for(int i = 0; i < surface->h; i++)
-           {
-           for(int j = 0; j < surface->w; j++)
-           {
-           Uint8 r, g, b;
-           SDL_GetRGB(pixels[i*surface->w + j], surface->format, &r, &g, &b);
-           if(r > 100)
-           {
-           printf("1 ");
-           }
-           else
-           {
-           printf("0 ");
-           }
-           }
-           printf("\n");
-           }
-           */
-
-
 
         // Converts wantedOutputs into a Matrix
         Matrix *wantedOutputsMatrix = malloc(sizeof(Matrix));
-        matrix_init(wantedOutputsMatrix, NumberOfOutputs, 1);
+        matrix_init(wantedOutputsMatrix, 10, 1);
 
-        size_t trainingIndex[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        //double t[2] = { 0.0f, 0.0f };
-
+        size_t trainingIndex[90];
+        for (size_t i = 0; i < 90; i++)
+        {
+            trainingIndex[i] = i;
+        }
 
         // Principal loop (Loop on data n times, with n = epoch)
         for (size_t n = 0; n < EPOCHS; n++)
         {
-            shuffle(trainingIndex, 10);
-            //for (size_t a = 0; a < 4; a++)
-            //{
-            //size_t index = trainingIndex[a];
-            //size_t a = rand() % 4;
-            //}
-
-            for (size_t a = 0; a < 10; a++)
+            shuffle(trainingIndex, 90);
+            for (size_t a = 0; a < 90; a++)
             {
-
                 for (size_t i = 0; i < wantedOutputsMatrix->row; i++)
                 {
-                    double temp = wantedOutputs[a][i * wantedOutputsMatrix->col];
+                    double temp = wantedOutputs[trainingIndex[a]][i];
                     matrix_set(wantedOutputsMatrix, i, 0, temp);
                 }
 
-                //printf("Matrice voulue");
+                //printf("Matrice voulue\n");
                 //matrix_print(wantedOutputsMatrix);
-
-                for (size_t b = 0; b < 10; b++)
-                {
-                    //array_print(inputs[index], 2);
-
-                    train(nn, inputs[trainingIndex[a]], 784, wantedOutputsMatrix);
-                }
-                //matrix_output_print(feedforward_algo(nn, t, 2));
-                //matrix_print(wantedOutputsMatrix);
-                //array_print(inputs[index], 2);
-                //separator();
+                train(nn, inputs[trainingIndex[a]], 784, wantedOutputsMatrix); 
             }
         }
 
+        printf("Training n°%li :\n", tx);
+        printf("----------------------------------------------------\n");
 
-        //separator();
-
-
-
-        
-           printf("Training n°%li :\n", tx);
-           printf("----------------------------------------------------\n");
-           Matrix *test1 = feedforward_algo(nn, inputs[0], 784);
-           matrix_print(test1);
-
-           printf("\n");
-           matrix_free(test1);
-           
-
+        Matrix *test1 = feedforward_algo(nn, inputs[0], 784);
+        matrix_print(test1);
+        printf("\n");
+        matrix_free(test1);
 
 
         /*
-
-           printf("| Inputs : 0 0 | Outputs : %lf | Expected : 0 |\n"
-           , matrix_get(test1, 0, 0));
-        //free(test1);
-        */
-
-        /*
-           Matrix *test2 = feedforward_algo(nn, inputs[1], 784);
-        //printf("| Inputs : 1 0 | Outputs : %lf | Expected : 1 |\n"
-        //, matrix_get(test2, 0, 0));
+        Matrix *test2 = feedforward_algo(nn, inputs[1], 784);
         matrix_print(test2);
-        */
-        //free(test2);
+        printf("\n"); 
+        matrix_free(test2);
 
-        /*
-           Matrix *test3 = feedforward_algo(nn, inputs[2], 784);
-           printf("| Inputs : 0 1 | Outputs : %lf | Expected : 1 |\n"
-           , matrix_get(test3, 0, 0));
-        //free(test3);
+        Matrix *test3 = feedforward_algo(nn, inputs[2], 784);
+        matrix_print(test3);
+        printf("\n");
+        matrix_free(test3);
 
         Matrix *test4 = feedforward_algo(nn, inputs[3], 784);
-        printf("| Inputs : 1 1 | Outputs : %lf | Expected : 0 |\n"
-        , matrix_get(test4, 0, 0));
-        printf("----------------------------------------------------\n");
-        //free(test4);
+        matrix_print(test4);
+        //printf("\n");
+        matrix_free(test4);
+
         */
-
-
+        
+        printf("----------------------------------------------------\n");
 
         if (tx == ite)
         {
@@ -744,7 +562,7 @@ int main(int argc, char** argv)
                 fprintf(fileptr, "|");
                 for (size_t j = 0; j < nn->hidden2Nodes; j++)
                 {
-                    double temp = matrix_get(nn->hidden1_hidden2Weights, i, j);
+                    double temp = matrix_get(nn->hidden1_hidden2Weights, j, i);
                     fprintf(fileptr, "%lf\t|", temp);
                 }
                 fprintf(fileptr, "\n");
@@ -762,7 +580,7 @@ int main(int argc, char** argv)
                 fprintf(fileptr, "|");
                 for (size_t j = 0; j < nn->outputNodes; j++)
                 {
-                    double temp = matrix_get(nn->hidden2_outputWeights, i, j);
+                    double temp = matrix_get(nn->hidden2_outputWeights, j, i);
                     fprintf(fileptr, "%lf\t|", temp);
                 }
                 fprintf(fileptr, "\n");
