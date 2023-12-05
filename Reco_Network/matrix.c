@@ -62,6 +62,30 @@ double matrix_get(Matrix *m, size_t row, size_t col)
     return m->data[row*(m->col) + col];
 }
 
+void matrix_softmax(Matrix *m)
+{
+    if (m->col != 1)
+    {
+        errx(1, "Dimension problem : Column must be set to 1. [Matrix lib] :\n%s->row = %lu and %s->col = %lu !\n",
+                getName(m), m->row, getName(m), m->col);
+    }
+    /*
+    Matrix *result = malloc(sizeof(Matrix));
+    matrix_init(result, m->row, 1);
+    */
+    long sum = 0;
+    for (size_t i = 0; i < m->row; i++)
+    {
+        sum += exp(matrix_get(m, i, 0));
+    }
+
+    for (size_t i = 0; i < m->row; i++)
+    {
+        double temp = matrix_get(m, i, 0);
+        matrix_set(m, i, 0, temp / sum);
+    }
+}
+
 Matrix *matrix_add(Matrix *m1, Matrix *m2)
 {
     /*

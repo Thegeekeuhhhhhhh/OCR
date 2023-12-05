@@ -167,6 +167,8 @@ Matrix *feedforward_algo(NeuralNetwork *nn, double inputs[], size_t len)
     free(hidden1);
     free(hidden2);
 
+    //matrix_print(output);
+
     return output;
 }
 
@@ -204,6 +206,15 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     // Acvtivation
     matrix_apply_function_in_place(output, sigmoid);
 
+    /*    
+    matrix_print(output);
+    printf("After softmax\n");
+    
+    matrix_softmax(output);
+    */
+
+    //matrix_print(output);
+    //printf("\n");
 
     // =========================================================================
     // Feed Forward processed
@@ -290,28 +301,27 @@ void train(NeuralNetwork *nn, double inputs[], size_t len, Matrix *wanted)
     matrix_free(dinput_hidden1Weights);
 
 
-    //matrix_free(outputLayer_error);
+    matrix_free(outputLayer_error); // DEL if problems
     matrix_free(hidden2Layer_error);
     matrix_free(hidden1Layer_error);
 
 
-    //matrix_free(gradient_h1);
-    //matrix_free(gradient_h2);
-    //matrix_free(gradient_out);
+    matrix_free(gradient_h1); // Dip
+    matrix_free(gradient_h2); // Dip
+    matrix_free(gradient_out); // Dip
 
-    /*
-       matrix_free(transposed_hidden1);
-       matrix_free(transposed_hidden2);
-       */
+    
+    matrix_free(transposed_hidden1); // Dip
+    matrix_free(transposed_hidden2); // Dip
+       
 
-    /*
-    //matrix_free(inputMatrix);
-    matrix_free(hidden1);
-    matrix_free(hidden2);
-    //matrix_free(output);
-    */
-
-
+    
+    matrix_free(inputMatrix); // Dip +1
+    matrix_free(hidden1); // Dip 
+    matrix_free(hidden2); // Dip
+    matrix_free(output); // Dip +1
+    
+    matrix_free(transposed_input); // Dip
 
 
     /*
@@ -636,24 +646,27 @@ int main(int argc, char** argv)
             {
                 for (size_t b = 0; b < 10; b++)
                 {
-                matrix_set(wantedOutputsMatrix, 0, 0,
-                        wantedOutputs[trainingIndex[a]][b]);
-                //
-                //  for (size_t i = 0; i < wantedOutputsMatrix->row; i++)
-                //   {
-                //   for (size_t j = 0; j < wantedOutputsMatrix->col; j++)
-                //  {
-                // double temp = wantedOutputs[a][i * wantedOutputsMatrix->col + j];
-                // matrix_set(wantedOutputsMatrix, i, j, temp);
-                // }
-                // }
-                //
+                    matrix_set(wantedOutputsMatrix, 0, 0,
+                            wantedOutputs[trainingIndex[a]][b]);
+                    //
+                    //  for (size_t i = 0; i < wantedOutputsMatrix->row; i++)
+                    //   {
+                    //   for (size_t j = 0; j < wantedOutputsMatrix->col; j++)
+                    //  {
+                    // double temp = wantedOutputs[a][i * wantedOutputsMatrix->col + j];
+                    // matrix_set(wantedOutputsMatrix, i, j, temp);
+                    // }
+                    // }
+                    //
 
 
-                //matrix_print(wantedOutputsMatrix);
-                //array_print(inputs[index], 2);
+                    printf("Matrice voulue");
+                    matrix_print(wantedOutputsMatrix);
 
-                train(nn, inputs[trainingIndex[a]], 784, wantedOutputsMatrix);
+                   //matrix_print(wantedOutputsMatrix);
+                    //array_print(inputs[index], 2);
+
+                    train(nn, inputs[trainingIndex[a]], 784, wantedOutputsMatrix);
                 }
                 //matrix_output_print(feedforward_algo(nn, t, 2));
                 //matrix_print(wantedOutputsMatrix);
@@ -666,26 +679,40 @@ int main(int argc, char** argv)
         //separator();
 
         
+
+        /*
         printf("Training n°%li :\n", tx);
         printf("----------------------------------------------------\n");
         Matrix *test1 = feedforward_algo(nn, inputs[0], 784);
         matrix_print(test1);
+
+        softmax(test1);        
+        
+        matrix_print(test1);
+        printf("\n");
+        */
+
+
+
         /*
 
-        printf("| Inputs : 0 0 | Outputs : %lf | Expected : 0 |\n"
-                , matrix_get(test1, 0, 0));
+           printf("| Inputs : 0 0 | Outputs : %lf | Expected : 0 |\n"
+           , matrix_get(test1, 0, 0));
         //free(test1);
+        */
 
-
-        
-           Matrix *test2 = feedforward_algo(nn, inputs[1], 784);
-           printf("| Inputs : 1 0 | Outputs : %lf | Expected : 1 |\n"
-           , matrix_get(test2, 0, 0));
+/*
+        Matrix *test2 = feedforward_algo(nn, inputs[1], 784);
+        //printf("| Inputs : 1 0 | Outputs : %lf | Expected : 1 |\n"
+        //, matrix_get(test2, 0, 0));
+        matrix_print(test2);
+*/
         //free(test2);
 
-        Matrix *test3 = feedforward_algo(nn, inputs[2], 784);
-        printf("| Inputs : 0 1 | Outputs : %lf | Expected : 1 |\n"
-        , matrix_get(test3, 0, 0));
+        /*
+           Matrix *test3 = feedforward_algo(nn, inputs[2], 784);
+           printf("| Inputs : 0 1 | Outputs : %lf | Expected : 1 |\n"
+           , matrix_get(test3, 0, 0));
         //free(test3);
 
         Matrix *test4 = feedforward_algo(nn, inputs[3], 784);
