@@ -17,7 +17,6 @@ typedef struct UserInterface
     GtkEntry* angle_entry;
 } UserInterface;
 
-// Structure of the game.
 typedef struct App
 {
     UserInterface ui;
