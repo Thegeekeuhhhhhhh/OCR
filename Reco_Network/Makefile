@@ -1,7 +1,7 @@
 CC = gcc
 CPPFLAGS =
 CFLAGS = -Wall -Wextra -O3 -lSDL2 -lSDL2_image `pkg-config --cflags sdl2 SDL2_image` 
-LDFLAGS = -lm `pkg-config --libs sdl2 SDL2_image` -fsanitize=address
+LDFLAGS = -lm `pkg-config --libs sdl2 SDL2_image` 
 LDLIBS = 
 
 all: neuralnetwork
