@@ -13,7 +13,7 @@ int main(void)
         int i = 1;
         while ((dir = readdir(d)) != NULL)
         {
-            if (dir->d_name[0] == 'i')
+            if (dir->d_name[0] == 'i' || (dir->d_name[0] >= '0' && dir->d_name[0] <= '9'))
             {
                 sprintf(str, "%i.jpg", i);
                 //printf("%s\n", dir->d_name);

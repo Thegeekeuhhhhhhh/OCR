@@ -81,7 +81,7 @@ void matrix_softmax(Matrix *m)
 
     for (size_t i = 0; i < m->row; i++)
     {
-        double temp = matrix_get(m, i, 0);
+        double temp = exp(matrix_get(m, i, 0));
         matrix_set(m, i, 0, temp / sum);
     }
 }
