@@ -505,8 +505,8 @@ int main(int argc, char** argv)
         {
             for (int index = 1; index <= max; index++)
             {
-                char str[45];
-                sprintf(str, "handwritten_digits/%i/%i.jpg", chapter, index);
+                char str[50];
+                sprintf(str, "digitalwritten_digits/%i/%i.jpg", chapter, index);
                 //printf("%s\n", str);
 
                 SDL_Surface* tmpSurface = IMG_Load(str);
@@ -596,12 +596,12 @@ int main(int argc, char** argv)
         printf("Training n°%li :\n", tx);
         printf("----------------------------------------------------\n");
 
-        double tests[202][784];
+        double tests[76][784];
 
-        for (int index = 1; index <= 202; index++)
+        for (int index = 1; index <= 76; index++)
         {
-            char str[45];
-            sprintf(str, "handwritten_digits/tests/%i.jpg", index);
+            char str[50];
+            sprintf(str, "digitalwritten_digits/tests/%i.jpg", index);
             SDL_Surface* tmpSurface = IMG_Load(str);
             if (tmpSurface == NULL)
             {
