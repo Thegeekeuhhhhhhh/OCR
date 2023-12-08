@@ -1,5 +1,5 @@
-#ifndef TEST_H
-#define TEST_H
+#ifndef LOAD_H
+#define LOAD_H
 
 #pragma once
 
@@ -8,7 +8,7 @@
 #include <math.h>
 #include <err.h>
 #include "train.h"
-#include "load.h"
+
+struct NeuralNetwork* load(char *str);
 
 #endif
-
