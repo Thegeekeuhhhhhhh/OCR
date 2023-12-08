@@ -343,6 +343,25 @@ void matrix_apply_function_in_place(Matrix *m, double (*f)(double))
     }
 }
 
+size_t matrix_max_index(Matrix *m)
+{
+    size_t index = 0;
+    double val = -1;
+    for (size_t i = 0; i < m->row; i++)
+    {
+        for (size_t j = 0; j < m->col; j++)
+        {
+            double temp = matrix_get(m, i, j);
+            if (temp > val)
+            {
+                val = temp;
+                index = i * m->col + j;
+            }
+        }
+    }
+    return index;
+}
+
 void array_print(double array[], size_t len)
 {
     printf("|");

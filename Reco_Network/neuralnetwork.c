@@ -318,12 +318,10 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    size_t trainingNumber = 1197; // Multiple of 9 pls
-    double inputs[trainingNumber][784];
-    double wantedOutputs[trainingNumber][10];
-
-    printf("Start !\n");
-
+    size_t trainingNumber = 2700; // Multiple of 9 pls
+    static double inputs[2700][784];
+    static double wantedOutputs[2700][10];
+    static size_t simpleOutputs[2700];
     for (size_t tx = 1; tx < ite+1; tx++)
     {
         NeuralNetwork *nn = malloc(sizeof(NeuralNetwork));
@@ -390,6 +388,7 @@ int main(int argc, char** argv)
                     wantedOutputs[(chapter-1) * max + index-1][o] = 0.0f;
                 }
                 wantedOutputs[(chapter-1) * max + index-1][chapter] = 1.0f;
+                simpleOutputs[(chapter-1) * max + index-1] = chapter;
                 SDL_FreeSurface(surface);
                 surface = NULL;
 
@@ -407,11 +406,25 @@ int main(int argc, char** argv)
             trainingIndex[i] = i;   
         }
 
-        //printf("Starting soon...\n");
-
+        printf("Dataset loaded !\n");
+        
         // Principal loop (Loop on data n times, with n = epoch)
-        for (size_t n = 0; n < EPOCHS; n++)
+        for (size_t n = 1; n <= EPOCHS; n++)
         {
+            char beautiful[150];
+            int percent = (int)(((double)n / (double)EPOCHS) * 100);
+            for (int i = 0; i < percent; i++)
+            {
+                beautiful[i] = '=';
+            }
+            beautiful[percent] = '>';
+            for (int i = percent + 1; i < 100; i++)
+            {
+                beautiful[i] = '_';
+            }
+            beautiful[100] = '\0';
+            
+            printf("%i[%s]\n\033[1A\033[K", percent, beautiful);
             shuffle(trainingIndex, trainingNumber);
             for (size_t a = 0; a < trainingNumber; a++)
             {
@@ -426,22 +439,23 @@ int main(int argc, char** argv)
                 //matrix_print(wantedOutputsMatrix);
                 train(nn, inputs[trainingIndex[a]], 784, wantedOutputsMatrix);
                 //train(nn, inputs[id_temp], 784, wantedOutputsMatrix);
-            }
+            } 
+            sleep(1);
         }
        
-        printf("Training n°%li :\n", tx);
+        printf("\nTraining n°%li :\n", tx);
         printf("----------------------------------------------------\n");
 
-        double tests[76][784];
-
-        printf("Alors\n");
-
-        for (int index = 1; index <= 76; index++)
+        int TestNumber = 10;
+        double tests[TestNumber][784];
+        size_t wantedO[TestNumber];
+        for (int index = 1; index <= TestNumber; index++)
         {
             for (int j = 0; j < 784; j++)
             {
                 tests[index-1][j] = inputs[trainingIndex[index-1]][j];
             }
+            wantedO[index-1] = simpleOutputs[trainingIndex[index-1]];
             /*
             char str[50];
             sprintf(str, "digitalwritten_digits/tests/%i.jpg", index);
@@ -479,22 +493,29 @@ int main(int argc, char** argv)
             */
         }
 
-        for (size_t r = 0; r < 10; r++)
+        int success = 0;
+        for (int r = 0; r < TestNumber; r++)
         {
            digit_print(tests[r]);
            Matrix *test1 = feedforward_algo(nn, tests[r], 784);
+
            matrix_print(test1);
-           printf("\n");
+           size_t ind_test = matrix_max_index(test1);
+           printf("\nResult : %li, Expected : %li\n", ind_test, wantedO[r]);
+           if (ind_test == wantedO[r])
+           {
+               success += 1;
+           }
            matrix_free(test1);
            sleep(1);
         }
-        
-        
+        printf("ACCURACY : %f%%\n", ((double)success / (double)TestNumber) * 100.0f);        
         if (tx == ite)
         {
             // Save the data of the neural network in a file
             FILE *fileptr = NULL;
             fileptr = fopen("Values.txt", "w");
+            //fprintf(fileptr, "Characteristics : ");
             fprintf(fileptr, "Input to hidden layer Weights :\n");
             for (size_t i = 0; i < nn->inputNodes; i++)
             {
@@ -502,7 +523,7 @@ int main(int argc, char** argv)
                 for (size_t j = 0; j < nn->hiddenNodes; j++)
                 {
                     double temp = matrix_get(nn->input_hiddenWeights, j, i);
-                    fprintf(fileptr, "%lf\t|", temp);
+                    fprintf(fileptr, "%lf|", temp);
                 }
                 fprintf(fileptr, "\n");
             }
@@ -511,7 +532,7 @@ int main(int argc, char** argv)
             for (size_t i = 0; i < nn->hidden_biases->row; i++)
             {
                 double temp = matrix_get(nn->hidden_biases, i, 0);
-                fprintf(fileptr, "|%lf\t|\n", temp);
+                fprintf(fileptr, "|%lf|\n", temp);
             }
 
             fprintf(fileptr, "\nHidden to output layer Weights :\n");
@@ -521,7 +542,7 @@ int main(int argc, char** argv)
                 for (size_t j = 0; j < nn->hiddenNodes; j++)
                 {
                     double temp = matrix_get(nn->hidden_outputWeights, j, i);
-                    fprintf(fileptr, "%lf\t|", temp);
+                    fprintf(fileptr, "%lf|", temp);
                 }
                 fprintf(fileptr, "\n");
             }
@@ -529,7 +550,7 @@ int main(int argc, char** argv)
             for (size_t i = 0; i < nn->output_biases->row; i++)
             {
                 double temp = matrix_get(nn->output_biases, i, 0);
-                fprintf(fileptr, "|%lf\t|\n", temp);
+                fprintf(fileptr, "|%lf|\n", temp);
             }
 
             fclose(fileptr);
