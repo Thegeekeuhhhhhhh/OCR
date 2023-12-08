@@ -127,7 +127,7 @@ char** new_char_matrix(char** matrix, char* filename){
     return final_mat;
 }
 
-
+/*
 int main(int argc, char** argv){
     
     char** matrix = parser(argv[2]);
@@ -149,4 +149,4 @@ int main(int argc, char** argv){
     SDL_FreeSurface(surface);
 
     return 0;
-}
+}*/
