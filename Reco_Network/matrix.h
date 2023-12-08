@@ -20,8 +20,6 @@ void matrix_init(Matrix *m, size_t row, size_t col);
 void matrix_free(Matrix *m);
 void matrix_free_data(Matrix *m);
 
-void matrix_softmax(Matrix *m);
-
 void matrix_identity(Matrix *m, size_t size);
 void matrix_set(Matrix *m, size_t row, size_t col, double value);
 double matrix_get(Matrix *m, size_t row, size_t col);

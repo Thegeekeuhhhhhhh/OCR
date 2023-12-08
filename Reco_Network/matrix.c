@@ -13,7 +13,6 @@ void matrix_init(Matrix *m, size_t row, size_t col)
     m->row = row;
     m->col = col;
     m->data = malloc(row * col * sizeof(double));
-    //printf("%p\n", m->data);
     m->dataLen = row * col;
     for (size_t i = 0; i < m->dataLen; i++)
     {
@@ -28,11 +27,8 @@ void matrix_free_data(Matrix *m)
 
 void matrix_free(Matrix *m)
 {
-    if (m != NULL)
-    {
-        free(m->data);
-        free(m);
-    }
+    free(m->data);
+    free(m);
 }
 
 void matrix_identity(Matrix *m, size_t size)
@@ -44,7 +40,7 @@ void matrix_identity(Matrix *m, size_t size)
     {
         errx(1, "Size must be > 1 for identity function [Matrix lib]");
     }
-    free(m->data);
+    matrix_free_data(m);
     matrix_init(m, size, size);
     for (size_t i = 0; i < size; i++)
     {
@@ -60,30 +56,6 @@ void matrix_set(Matrix *m, size_t row, size_t col, double value)
 double matrix_get(Matrix *m, size_t row, size_t col)
 {
     return m->data[row*(m->col) + col];
-}
-
-void matrix_softmax(Matrix *m)
-{
-    if (m->col != 1)
-    {
-        errx(1, "Dimension problem : Column must be set to 1. [Matrix lib] :\n%s->row = %lu and %s->col = %lu !\n",
-                getName(m), m->row, getName(m), m->col);
-    }
-    /*
-    Matrix *result = malloc(sizeof(Matrix));
-    matrix_init(result, m->row, 1);
-    */
-    long sum = 0;
-    for (size_t i = 0; i < m->row; i++)
-    {
-        sum += exp(matrix_get(m, i, 0));
-    }
-
-    for (size_t i = 0; i < m->row; i++)
-    {
-        double temp = exp(matrix_get(m, i, 0));
-        matrix_set(m, i, 0, temp / sum);
-    }
 }
 
 Matrix *matrix_add(Matrix *m1, Matrix *m2)
@@ -409,9 +381,9 @@ double arround(double val)
 void matrix_output_print(Matrix *m)
 {
     /*
-       Prints the matrix m in a beautiful way, and prints the output rounded
-       to 0 or 1
-       */
+     Prints the matrix m in a beautiful way, and prints the output rounded
+     to 0 or 1
+     */
     for (size_t i = 0; i < m->row; i++)
     {
         printf("|");
