@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include "Reco_Network/neuralnetwork.h"
 
 // Structure of the graphical user interface.
 typedef struct UserInterface
@@ -43,7 +45,7 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
      struct App *app = user_data;
      long i = 0, y = 1, c = 0;
      char *param1, param2, param3;
-     while (app->ui.param_entry[i]!=NULL)
+     while (app->ui.param_entry[i] != NULL)
 	     if (app->ui.param_entry[i] == ' '){
 	         if (y == 1)
 		 {y ++; *(param1+c) = 0;c=0;}
@@ -53,11 +55,17 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
 	         {y ++; *(param3+c) = 0;c=0;}
 	     }
 	     if (y == 1)
-	     {*(param1+c) = app->ui.param_entry[i];c++;}
-             if (y == 2)
-	     {*(param2+c) = app->ui.param_entry[i];c++;}
+	     {
+             *(param1+c) = app->ui.param_entry[i];c++;
+         }
+         if (y == 2)
+	     {
+             *(param2+c) = app->ui.param_entry[i];c++;
+         }
 	     if (y == 3)
-	     {*(param3+c) = app->ui.param_entry[i];c++;}
+	     {
+             *(param3+c) = app->ui.param_entry[i];c++;
+         }
 
      //add first preprocess function
      exec("./",param1,param2);
@@ -202,7 +210,7 @@ int main (int argc, char *argv[])
                 .ai_button = ai_button,
                 .solver_button = solver_button,
                 .ocr_button = ocr_button,
-                .angle_entry = angle_entry,
+                    .angle_entry = angle_entry,
             },
             .filename = filename,
         };

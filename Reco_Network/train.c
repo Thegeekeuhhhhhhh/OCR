@@ -331,7 +331,7 @@ int train(size_t EPOCHS, double learning_rate)
     size_t trainingIndex[trainingNumber];
     for (size_t i = 0; i < trainingNumber; i++) { trainingIndex[i] = i; }
 
-    printf("Dataset loading...\n");
+    printf("Training set loading...\n");
     char beautiful[100];
     for (int i = 0; i < 99; i++) { beautiful[i] = '_'; }
     beautiful[99] = '\0';
