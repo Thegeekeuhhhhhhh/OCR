@@ -1,29 +1,26 @@
-CC = gcc #-fsanitize=address
-CFLAGS = -O3 `pkg-config --cflags sdl2 SDL2_image`
-LDLIBS = `pkg-config --libs sdl2 SDL2_image` -lm
+CC = gcc
+CFLAGS = -Wall -Werror -std=c11
+LDFLAGS = `pkg-config --libs sdl2 SDL2_image` -lm #-lSDL2 -lSDL2_image
 
-all: gaussian_blur binarisation
+all: pretreatment reconstruction
 
-SRC = gray_im.c gaussian_blur.c binarisation.c
-OBJ = ${SRC:.c=.o}
+pretreatment: pretreatment.o gray_im.o
+	$(CC) $(CFLAGS) -o pretreatment pretreatment.o gray_im.o $(LDFLAGS)
 
-# Define dependencies for each target
-gaussian_blur: gray_im.o gaussian_blur.o
-	$(CC) -o $@ $^ $(LDLIBS)
+pretreatment.o: pretreatment.c pretreatment.h gray_im.c gray_im.h 
+	$(CC) $(CFLAGS) -c pretreatment.c
 
-binarisation: gray_im.o gaussian_blur.o binarisation.o
-	$(CC) -o $@ $^ $(LDLIBS)
+gray_im.o: gray_im.c
+	$(CC) $(CFLAGS) -c gray_im.c
 
-# Compilation rules for source files
-gray_im.o: gray_im.c gray_im.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+reconstruction: reconstruction.o
+	$(CC) $(CFLAGS) -o reconstruction reconstruction.o  $(LDFLAGS)
 
-gaussian_blur.o: gaussian_blur.c gaussian_blur.h gray_im.h
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-binarisation.o: binarisation.c binarisation.h gray_im.h gaussian_blur.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+reconstruction.o: reconstruction.c
+	$(CC) $(CFLAGS) -c reconstruction.c
 
 clean:
-	rm -f gaussian_blur binarisation $(OBJ)
-
+	rm -f *.o gray_im *.d
+	rm -f *.o reconstruction *.d
+	rm -f *.o pretreatment *.d
+	rm -f *.bmp

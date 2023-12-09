@@ -80,7 +80,6 @@ void update_surface(SDL_Surface* surface, struct my_image* image){
     }
 }
 
-
 /*
 int main(int argc, char** argv){
     if(argc != 2)
@@ -104,4 +103,5 @@ int main(int argc, char** argv){
     free_pixels(image->pixels, image->h);
     SDL_FreeSurface(surface);
     return 0;
-}*/
+}
+*/
