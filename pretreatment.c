@@ -113,8 +113,14 @@ void applySobelFilter(SDL_Surface *inputSurface, SDL_Surface *outputSurface) {
     int sobelY[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
 
     // Loop through each pixel in the image (excluding border pixels)
-    for (int y = 1; y < inputSurface->h - 1; y++) {
-        for (int x = 1; x < inputSurface->w - 1; x++) {
+    for (int y = 0; y < inputSurface->h; y++) {
+        for (int x = 0; x < inputSurface->w; x++) {
+            
+            if(y == 0 || x == 0 || y == inputSurface->h-1 || x == inputSurface->w-1){
+                Uint8 *outputPixel = (Uint8 *)outputSurface->pixels + (y * outputSurface->pitch) + (x * sizeof(Uint32));
+                outputPixel[0] = outputPixel[1] = outputPixel[2] = 0;
+                continue;
+            }
             // Calculate Sobel gradients for both x and y directions
             int gradientX = 0;
             int gradientY = 0;
@@ -143,6 +149,32 @@ void applySobelFilter(SDL_Surface *inputSurface, SDL_Surface *outputSurface) {
     }
 }
 
+void reverseColors(SDL_Surface* surface) {
+    if (surface->format->BytesPerPixel == 4) { // Ensure it's a 32-bit image (4 bytes per pixel)
+        Uint32* pixels = (Uint32*)surface->pixels;
+        int pixelCount = surface->w * surface->h;
+
+        for (int i = 0; i < pixelCount; ++i) {
+            Uint32 pixel = pixels[i];
+
+            // Extract individual color components
+            Uint8 red = pixel & 0xFF;
+            Uint8 green = (pixel >> 8) & 0xFF;
+            Uint8 blue = (pixel >> 16) & 0xFF;
+            Uint8 alpha = (pixel >> 24) & 0xFF;
+
+            // Reverse colors
+            red = 255 - red;
+            green = 255 - green;
+            blue = 255 - blue;
+
+            // Recombine color components
+            pixel = (alpha << 24) | (blue << 16) | (green << 8) | red;
+
+            pixels[i] = pixel;
+        }
+    }
+}
 
 /*
 int main(int argc, char** argv){
@@ -158,7 +190,6 @@ int main(int argc, char** argv){
     applySauvolaFilter(one,two, atoi(argv[3]), atof(argv[4]));
     
     applySobelFilter(two,one);
-
     SDL_SaveBMP(one, "sob.bmp");    
     SDL_SaveBMP(two, "sauv.bmp");
 
