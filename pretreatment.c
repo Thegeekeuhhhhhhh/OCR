@@ -144,6 +144,7 @@ void applySobelFilter(SDL_Surface *inputSurface, SDL_Surface *outputSurface) {
 }
 
 
+/*
 int main(int argc, char** argv){
     if(argc != 5){
         err(1, "not good my friend");
@@ -166,3 +167,4 @@ int main(int argc, char** argv){
     
     return 0;
 }
+*/

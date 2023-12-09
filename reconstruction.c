@@ -127,26 +127,33 @@ char** new_char_matrix(char** matrix, char* filename){
     return final_mat;
 }
 
-/*
-int main(int argc, char** argv){
-    
-    char** matrix = parser(argv[2]);
-    char** second_mat = new_char_matrix(matrix, argv[3]);
-    SDL_Surface* surface = SDL_LoadBMP(argv[1]);
+
+void reco(const char* init_grid, char* final_grid){
+    char** first_mat = parser(init_grid);
+    char** secon_mat = new_char_matrix(first_mat, final_grid);
+    SDL_Surface* surface = SDL_LoadBMP("digits/blank.bmp");
     for(int i = 0; i < 9; i++){
         for(int j =  0; j < 9; j++){
-            fixed_apply_digit(surface, return_digit_path(matrix[i][j] -  48,0), 111*j + 15, 111*i + 15);
+            fixed_apply_digit(surface, return_digit_path(first_mat[i][j] -  48,0), 111*j + 15, 111*i + 15);
         }
     }
+    
 
     for(int i = 0; i < 9; i++){
         for(int j =  0; j < 9; j++){
-            fixed_apply_digit(surface, return_digit_path(second_mat[i][j] -  48,1), 111*j + 15, 111*i + 15);
+            fixed_apply_digit(surface, return_digit_path(secon_mat[i][j] -  48,1), 111*j + 15, 111*i + 15);
         }
     }
 
     SDL_SaveBMP(surface, "grid.bmp");
     SDL_FreeSurface(surface);
+}
+
+/*
+int main(int argc, char** argv){
+    
+    reco(argv[1],argv[2]);
+
 
     return 0;
 }*/
