@@ -9,6 +9,6 @@
 #include <err.h>
 #include "train.h"
 
-struct NeuralNetwork* load(char *str);
+struct NeuralNetwork* load_network(char *str);
 
 #endif

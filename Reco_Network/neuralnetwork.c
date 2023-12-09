@@ -64,9 +64,7 @@ int main(int argc, char **argv)
         }
         argv++;
         learning_rate = strtod(*argv, NULL);
-
         train(EPOCHS, learning_rate);
-
         return 0;
     }
 
@@ -78,8 +76,15 @@ int main(int argc, char **argv)
                     "./test [Number of random tests OR name of an image file]");
         }
 
-        NeuralNetwork *nn = load("Values.txt");
-        printf("Loading done\n");
+        struct NeuralNetwork *nn = load_network("Values.txt");
+        //printf("End load\n");
+        //printf("YP\n");
+        //printf("LA TELE ICI\n");
+        //printf("%li et \n", nn->hiddenNodes);
+        //matrix_print(nn->output_biases);
+        //printf("h\no");
+        //matrix_print(nn->hidden_biases);
+        //printf("Loading done\n");
         argv++;
         char *filename = *argv;
         if (*filename == '0')
@@ -157,7 +162,6 @@ int main(int argc, char **argv)
             {
                 digit_print(inputs[r]);
                 Matrix *test1 = feedforward_algo(nn, inputs[r], 784);
-
                 matrix_print(test1);
                 size_t ind_test = matrix_max_index(test1);
                 printf("Result : %li, Expected : %li\n", ind_test, simpleOutputs[r]);
@@ -169,6 +173,7 @@ int main(int argc, char **argv)
                 sleep(1);
             }
             printf("ACCURACY : %f%%\n", ((double)success / (double)number) * 100.0f);
+            matrix_free(wantedOutputsMatrix);
         }
         else
         {
@@ -206,14 +211,15 @@ int main(int argc, char **argv)
             SDL_FreeSurface(surface);
             Matrix *wantedOutputsMatrix = malloc(sizeof(Matrix));
             matrix_init(wantedOutputsMatrix, 10, 1);
-
             digit_print(inputs);
             Matrix *test1 = feedforward_algo(nn, inputs, 784);
             matrix_print(test1);
             printf("Result : %li\n", matrix_max_index(test1));
+            matrix_free(wantedOutputsMatrix);
         }
 
         SDL_Quit();
+        free_network(nn);
         return 0;
     }
 

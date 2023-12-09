@@ -10,5 +10,7 @@
 #include "train.h"
 #include "load.h"
 
+int convert(char *str);
+
 #endif
 
