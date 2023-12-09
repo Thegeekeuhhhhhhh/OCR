@@ -17,6 +17,10 @@ struct Line{
     int nblines;
 };
 
+struct Point{
+    int x;
+    int y;
+}; 
 struct Line houghTransform(Uint8** pixels, int width, int height);
 
 void findLocalMaxima(struct Line* newLine, int *accumulator

@@ -5,6 +5,8 @@
 #include "gray_im.h"
 #include "line.h"
 
+#define THRESHOLD (M_PI / 90.0)
+
 // Initialisation de la fenêtre SDL
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -77,7 +79,8 @@ void findLocalMaxima(struct Line* newLine, int *accumulator
                     }
                 }
                 if (is_max) {
-                    addLine(newLine, r, t);
+                    double theta = t * M_PI / 180.0;
+                    addLine(newLine, r, theta);
                     
                 }
             }
@@ -97,41 +100,68 @@ void addLine(struct Line* myLine, double rho, double theta) {
     myLine->line[myLine->nblines - 1].theta = theta;
 }
 
-void cropImage(SDL_Surface* image, struct l* lines, int numLines, struct my_image *img ,const char* outputDirectory) {
-    for (int i = 0; i < numLines; i++) {
-        for (int j = i + 1; j < numLines; j++) {
-            // Vérifier si les lignes se croisent
-            // ou sont suffisamment proches pour être
-            // considérées comme intersectantes
-            if (fabs(lines[i].theta - lines[j].theta) > 0.1) {
-                // Calculer les coordonnées de l'intersection des lignes
-                int x_intersect = (int)((lines[j].rho * sin(lines[i].theta)
-                            - lines[i].rho * sin(lines[j].theta))
-                            / sin(lines[j].theta - lines[i].theta));
-                int y_intersect = (int)((lines[i].rho * cos(lines[j].theta)
-                            - lines[j].rho * cos(lines[i].theta))
-                            / sin(lines[i].theta - lines[j].theta));
+void calculateIntersection(struct Line lines, struct Point* intersectionPoints) {
+    int i, j;
+    for (i = 0; i < lines.nblines; i++) {
+        double rho1 = lines.line[i].rho;
+        double theta1 = lines.line[i].theta;
 
-                // Déterminer les valeurs de width and height
-                int width = img->w/10; // Remplacez par la valeur appropriée
-                int height = img->h/10; // Remplacez par la valeur appropriée
+        for (j = i + 1; j < lines.nblines; j++) {
+            double rho2 = lines.line[j].rho;
+            double theta2 = lines.line[j].theta;
 
-                // Utiliser ces coordonnées pour définir les limites de découpe et découper l'image
-                SDL_Surface* croppedImage = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
-                SDL_Rect rect;
-                rect.x = x_intersect; // Mettez les coordonnées appropriées ici
-                rect.y = y_intersect; // Mettez les coordonnées appropriées ici
-                rect.w = width; // Mettez la largeur appropriée ici
-                rect.h = height; // Mettez la hauteur appropriée ici
-                SDL_BlitSurface(image, &rect, croppedImage, NULL);
-
-                // Enregistrez l'image découpée dans un répertoire spécifié
-                char filename[100];
-                sprintf(filename, "%s/cropped_%02d.png", outputDirectory, i); // Nom de fichier basé sur l'index de la ligne
-                IMG_SavePNG(croppedImage, filename);
-
-                SDL_FreeSurface(croppedImage);
+            // Check if lines are nearly parallel
+            if (fabs(theta1 - theta2) > THRESHOLD) {
+                    intersectionPoints[i].x = rho1;
+                    intersectionPoints[i].y = rho2;
             }
+        }
+    }
+}
+
+void resizeImage(SDL_Surface* srcSurface, SDL_Surface* destSurface) {
+    SDL_Rect destRect = {0, 0, 28, 28}; // Nouvelles dimensions 28x28
+
+    SDL_BlitScaled(srcSurface, NULL, destSurface, &destRect);
+}
+
+void extractSudokuCells(SDL_Surface* surface, int x1, int y1, int x2, int y2) {
+    int cellWidth = (x2 - x1) / 9;
+    int cellHeight = (y2 - y1) / 9;
+    int border = 15; // Taille de la bordure à supprimer (ajustez selon vos besoins)
+    int nonBlackThreshold = (cellWidth - 2 * border) * (cellHeight - 2 * border) * 0.02; // Seuil de 10% de pixels non noirs
+
+    for (int row = 0, y = y1; row < 9; row++, y += cellHeight) {
+        for (int col = 0, x = x1; col < 9; col++, x += cellWidth) {
+            SDL_Rect cellRect = {x + border, y + border, cellWidth - 2 * border, cellHeight - 2 * border};
+
+            SDL_Surface* cellSurface = SDL_CreateRGBSurface(0, cellWidth - 2 * border, cellHeight - 2 * border, 32, 0, 0, 0, 0);
+            SDL_BlitSurface(surface, &cellRect, cellSurface, NULL);
+
+            int nonBlackPixels = 0;
+
+            for (int i = 0; i < cellSurface->w; i++) {
+                for (int j = 0; j < cellSurface->h; j++) {
+                    Uint32 pixel = *((Uint32*)cellSurface->pixels + j * cellSurface->pitch / 4 + i);
+                    Uint8 r, g, b;
+                    SDL_GetRGB(pixel, cellSurface->format, &r, &g, &b);
+
+                    // Vérifier si le pixel n'est pas presque noir
+                    if (r > 10 || g > 10 || b > 10) {
+                        nonBlackPixels++;
+                    }
+                }
+            }
+
+            // Enregistrer la cellule si elle a au moins le seuil de pixels non noirs
+            if (nonBlackPixels >= nonBlackThreshold) {
+                char filename[50];
+                sprintf(filename, "output/%d_%d.png", row, col);
+
+                SDL_SaveBMP(cellSurface, filename);
+            }
+
+            SDL_FreeSurface(cellSurface);
         }
     }
 }
@@ -207,7 +237,6 @@ int main(int argc, char** argv) {
     if (!initSDL()) {
         return -1;
     }
-    
 
     // Dessiner les lignes sur la surface
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
@@ -218,9 +247,37 @@ int main(int argc, char** argv) {
     
     printf("%i\n", myLine.nblines);
 
-    SDL_RenderPresent(renderer);
+    struct Point* intersectionPoints = (struct Point*)malloc(myLine.nblines * (myLine.nblines - 1) / 2 * sizeof(struct Point));
 
-    cropImage(surf, myLine.line, myLine.nblines, img, "output");
+    calculateIntersection(myLine, intersectionPoints);
+
+    for (int i = 0; i < myLine.nblines * (myLine.nblines - 1) / 2; i++) {
+        SDL_RenderDrawPoint(renderer, intersectionPoints[i].x, intersectionPoints[i].y);
+    }
+ 
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE); // Vert
+
+    int x1 = myLine.line[0].rho;
+    int y1 = myLine.line[1].rho;
+    int x2 = myLine.line[myLine.nblines-2].rho;
+    int y2 = myLine.line[myLine.nblines-1].rho;
+        
+    extractSudokuCells(surf, x1, y1, x2, y2);
+
+    // Dessiner chaque point avec une taille de 3x3
+    for (int i = 0; i < myLine.nblines * (myLine.nblines - 1) / 2; i++) {
+        int x = intersectionPoints[i].x;
+        int y = intersectionPoints[i].y;
+
+        // Dessiner un carré 3x3 autour du point central (x, y)
+        for (int offsetX = -1; offsetX <= 1; offsetX++) {
+            for (int offsetY = -1; offsetY <= 1; offsetY++) {
+                SDL_RenderDrawPoint(renderer, x + offsetX, y + offsetY);
+            }
+        }
+    }
+
+    SDL_RenderPresent(renderer);
 
     // Boucle d'événements principale
     SDL_Event e;
