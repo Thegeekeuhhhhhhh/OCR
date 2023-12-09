@@ -286,7 +286,7 @@ int train(size_t EPOCHS, double learning_rate)
             SDL_Surface* tmpSurface = IMG_Load(str);
             if (tmpSurface == NULL)
             {
-                errx(1, "Quoicouprout");
+                errx(1, "Pb d ouverture SDL dans train");
             }
             SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface,
                     SDL_PIXELFORMAT_RGB888, 0);

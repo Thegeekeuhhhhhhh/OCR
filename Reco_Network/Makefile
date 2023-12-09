@@ -6,8 +6,8 @@ LDLIBS =
 
 all: neuralnetwork
 
-neuralnetwork: neuralnetwork.o train.o matrix.o load.o
-	$(CC) $(CFLAGS) -o neuralnetwork neuralnetwork.o train.o matrix.o load.o $(LDFLAGS)
+neuralnetwork: neuralnetwork.o train.o matrix.o load.o nn.o
+	$(CC) $(CFLAGS) -o neuralnetwork neuralnetwork.o train.o matrix.o load.o nn.o $(LDFLAGS)
 
 neuralnetwork.o: neuralnetwork.c neuralnetwork.h train.h matrix.h load.h
 	$(CC) $(CFLAGS) -c neuralnetwork.c 
@@ -23,6 +23,9 @@ train.o: train.c train.h matrix.h
 
 matrix.o: matrix.c matrix.h
 	$(CC) $(CFLAGS) -c matrix.c
+
+nn.o: nn.c nn.h
+	$(CC) $(CFLAGS) -c nn.c
 
 clean:
 	rm -f *.o neuralnetwork *.d

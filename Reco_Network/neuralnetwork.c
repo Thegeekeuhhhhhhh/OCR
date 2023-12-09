@@ -2,6 +2,7 @@
 #include <err.h>
 #include "train.h"
 #include "matrix.h"
+#include "nn.h"
 #include <unistd.h>
 #include <SDL.h>
 #include <SDL2/SDL.h>
@@ -25,6 +26,7 @@ int convert(char *str)
     return res;
 }
 
+/*
 int guess(char *database, char *filename)
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -87,6 +89,7 @@ int guess(char *database, char *filename)
     matrix_free(test1);
     return maxi;
 }
+*/
 
 int main(int argc, char **argv)
 {
@@ -177,7 +180,7 @@ int main(int argc, char **argv)
                 SDL_Surface* tmpSurface = IMG_Load(str);
                 if (tmpSurface == NULL)
                 {
-                    errx(1, "Quoicouprout");
+                    errx(1, "Skill issue ca ouvre pas SDL");
                 }
                 SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface,
                         SDL_PIXELFORMAT_RGB888, 0);

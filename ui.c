@@ -65,20 +65,9 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
         }
         i++;
 
-    char *args[] = {"[NOM DU FICHIER]", param1, param2};
+    char *args[] = {"./pretreatment/pretreatment", param1, param2};
     //add first preprocess function
-    execvp("[NOM DU FICHIER A EXEC]", args);
-
-
-    char *args2[]= {"[NOM DU FICHIER]", param3}; 
-    //add second preprocess function
-    execvp("[NOM DU FICHIER A EXEC]", args2);
-
-    char *args3[] = {"LE NOM"};
-    //add third preprocess function
-    execvp("[NOM DU DERNIER FICHIER]", args3);
-
-
+    execvp("./pretreatment/pretreatment", args);
 
     app->filename = "process.png";
 
@@ -93,9 +82,8 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
 void on_rotate(GtkButton *rotation_button, gpointer user_data)
 {
     struct App *app = user_data;
-    int angle = atoi(gtk_entry_get_text(app->ui.param_entry));
 
-    char *args = {"rota", angle};
+    char *args = {"rota", gtk_entry_get_text(app->ui.param_entry)};
     //add rotation function
     execvp("rota", args);
 

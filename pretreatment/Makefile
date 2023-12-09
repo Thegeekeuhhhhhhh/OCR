@@ -2,18 +2,25 @@ CC = gcc
 CFLAGS = -Wall -Werror -std=c11
 LDFLAGS = `pkg-config --libs sdl2 SDL2_image` -lm #-lSDL2 -lSDL2_image
 
-SRCS = $(wildcard *.c)
-OBJS = $(SRCS:.c=.o)
-EXECUTABLE = my_program
+all: pretreatment reconstruction
 
-all: $(EXECUTABLE)
+pretreatment: pretreatment.o gray_im.o
+	$(CC) $(CFLAGS) -o pretreatment pretreatment.o gray_im.o $(LDFLAGS)
 
-$(EXECUTABLE): $(OBJS)
-	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJS) $(LDFLAGS)
+pretreatment.o: pretreatment.c pretreatment.h gray_im.c gray_im.h 
+	$(CC) $(CFLAGS) -c pretreatment.c
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+gray_im.o: gray_im.c
+	$(CC) $(CFLAGS) -c gray_im.c
+
+reconstruction: reconstruction.o
+	$(CC) $(CFLAGS) -o reconstruction reconstruction.o  $(LDFLAGS)
+
+reconstruction.o: reconstruction.c
+	$(CC) $(CFLAGS) -c reconstruction.c
 
 clean:
-	rm -f $(OBJS) $(EXECUTABLE)
-
+	rm -f *.o gray_im *.d
+	rm -f *.o reconstruction *.d
+	rm -f *.o pretreatment *.d
+	rm -f *.bmp
