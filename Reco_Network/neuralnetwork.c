@@ -25,6 +25,69 @@ int convert(char *str)
     return res;
 }
 
+int guess(char *database, char *filename)
+{
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        errx(1, "Erreur d'init SDL");
+        return -1;
+    }
+
+    struct NeuralNetwork *nn = load_network(database);
+    if (nn == NULL)
+    {
+        errx(1, "Failed to open %s", database);
+    }
+
+    double inputs[784];
+    SDL_Surface* tmpSurface = IMG_Load(filename);
+    if (tmpSurface == NULL)
+    {
+        errx(1, "Can not open %s", filename);
+    }
+    SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface,
+            SDL_PIXELFORMAT_RGB888, 0);
+
+    SDL_FreeSurface(tmpSurface);
+    if(surface == NULL)
+    {
+        SDL_FreeSurface(tmpSurface);
+        errx(1, "AMPANYANE");
+    }
+    tmpSurface = NULL;
+    Uint32 *pixels = surface->pixels;
+    for (size_t f = 0; f < 784; f++)
+    {
+        Uint8 r, g, b;
+        SDL_GetRGB(pixels[f], surface->format, &r, &g, &b);
+        double gs =  (0.32*r + 0.57*g + 0.11*b) / 255.0f;
+        if (gs >= 0.5f)
+        {
+            inputs[f] = 1;
+        }
+        else
+        {
+            inputs[f] = 0;
+        }
+    }
+    SDL_FreeSurface(surface);
+    Matrix *wantedOutputsMatrix = malloc(sizeof(Matrix));
+    matrix_init(wantedOutputsMatrix, 10, 1);
+    digit_print(inputs);
+    Matrix *test1 = feedforward_algo(nn, inputs, 784);
+    matrix_print(test1);
+
+    int maxi = matrix_max_index(test1);
+
+    printf("Result : %li\n", matrix_max_index(test1));
+    matrix_free(wantedOutputsMatrix);
+
+    SDL_Quit();
+    free_network(nn);
+    matrix_free(test1);
+    return maxi;
+}
+
 int main(int argc, char **argv)
 {
     if (argc < 2)
@@ -76,15 +139,6 @@ int main(int argc, char **argv)
                     "./test [Number of random tests OR name of an image file]");
         }
 
-        struct NeuralNetwork *nn = load_network("Values.txt");
-        //printf("End load\n");
-        //printf("YP\n");
-        //printf("LA TELE ICI\n");
-        //printf("%li et \n", nn->hiddenNodes);
-        //matrix_print(nn->output_biases);
-        //printf("h\no");
-        //matrix_print(nn->hidden_biases);
-        //printf("Loading done\n");
         argv++;
         char *filename = *argv;
         if (*filename == '0')
@@ -92,15 +146,21 @@ int main(int argc, char **argv)
             errx(1, "Not funny -_-");
         }
 
-        if (SDL_Init(SDL_INIT_VIDEO) < 0)
-        {
-            errx(1, "Erreur d'init SDL");
-            return -1;
-        }
-
         int number = convert(filename);
         if (number != -1)
         {
+            struct NeuralNetwork *nn = load_network("Values.txt");
+            if (nn == NULL)
+            {
+                errx(1, "Failed to open Values.txt");
+            }
+
+            if (SDL_Init(SDL_INIT_VIDEO) < 0)
+            {
+                errx(1, "Erreur d'init SDL");
+                return -1;
+            }
+
             if (number > 1200)
             {
                 errx(1, "Number is too large");
@@ -174,52 +234,14 @@ int main(int argc, char **argv)
             }
             printf("ACCURACY : %f%%\n", ((double)success / (double)number) * 100.0f);
             matrix_free(wantedOutputsMatrix);
+            free_network(nn);
+            SDL_Quit();
         }
         else
         {
-            double inputs[784];
-            SDL_Surface* tmpSurface = IMG_Load(filename);
-            if (tmpSurface == NULL)
-            {
-                errx(1, "Can not open %s", filename);
-            }
-            SDL_Surface* surface = SDL_ConvertSurfaceFormat(tmpSurface,
-                    SDL_PIXELFORMAT_RGB888, 0);
-
-            SDL_FreeSurface(tmpSurface);
-            if(surface == NULL)
-            {
-                SDL_FreeSurface(tmpSurface);
-                errx(1, "AMPANYANE");
-            }
-            tmpSurface = NULL;
-            Uint32 *pixels = surface->pixels;
-            for (size_t f = 0; f < 784; f++)
-            {
-                Uint8 r, g, b;
-                SDL_GetRGB(pixels[f], surface->format, &r, &g, &b);
-                double gs =  (0.32*r + 0.57*g + 0.11*b) / 255.0f;
-                if (gs >= 0.5f)
-                {
-                    inputs[f] = 1;
-                }
-                else
-                {
-                    inputs[f] = 0;
-                }
-            }
-            SDL_FreeSurface(surface);
-            Matrix *wantedOutputsMatrix = malloc(sizeof(Matrix));
-            matrix_init(wantedOutputsMatrix, 10, 1);
-            digit_print(inputs);
-            Matrix *test1 = feedforward_algo(nn, inputs, 784);
-            matrix_print(test1);
-            printf("Result : %li\n", matrix_max_index(test1));
-            matrix_free(wantedOutputsMatrix);
+            guess("1K_Training", *argv);
         }
 
-        SDL_Quit();
-        free_network(nn);
         return 0;
     }
 

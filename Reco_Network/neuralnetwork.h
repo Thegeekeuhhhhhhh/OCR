@@ -11,6 +11,7 @@
 #include "load.h"
 
 int convert(char *str);
+int guess(char *database, char *filename);
 
 #endif
 

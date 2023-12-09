@@ -14,8 +14,8 @@ void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hiddenNumber, si
 
     nn->input_hiddenWeights = malloc(sizeof(Matrix));
     // Represents weights between Input layer and hidden layer
-    matrix_init(nn->input_hiddenWeights, nn->hiddenNodes, nn->inputNodes);
 
+    matrix_init(nn->input_hiddenWeights, nn->hiddenNodes, nn->inputNodes);
     // Randomizing weights values between input and hidden layer
     for (size_t i = 0; i < nn->input_hiddenWeights->row; i++)
     {
@@ -42,15 +42,12 @@ void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hiddenNumber, si
 
     nn->hidden_biases = malloc(sizeof(Matrix));
     matrix_init(nn->hidden_biases, nn->hiddenNodes, 1);
-    //matrix_print(nn->hidden_biases);
     // This is a single column matrix
     for (size_t i = 0; i < nn->hidden_biases->row; i++)
     {             
         double temp = ((double)rand()) / ((double)RAND_MAX);
         matrix_set(nn->hidden_biases, i, 0, temp);                
     }
-    //matrix_print(nn->hidden_biases);
-
     nn->output_biases = malloc(sizeof(Matrix));
     matrix_init(nn->output_biases, nn->outputNodes, 1);
     // Single column matrix too
@@ -60,8 +57,6 @@ void init_network(NeuralNetwork *nn, size_t inputNumber, size_t hiddenNumber, si
         double temp = ((double)rand()) / ((double)RAND_MAX);
         matrix_set(nn->output_biases, i, 0, temp);
     }
-    
-    //matrix_print(nn->hidden_biases);
 }
 
 void free_network(NeuralNetwork *nn)
@@ -119,11 +114,7 @@ Matrix *feedforward_algo(NeuralNetwork *nn, double inputs[], size_t len)
 
     // Computes hidden's outputs
     Matrix *hidden = matrix_dot_product(nn->input_hiddenWeights, inputMatrix);
-    //printf("Step 1\n");
     matrix_add_in_place(hidden, nn->hidden_biases);
-    //matrix_print(hidden);
-    //printf("\n");
-    //printf("Step 1 Done\n");
 
     // Activation
     matrix_apply_function_in_place(hidden, sigmoid);
@@ -133,21 +124,11 @@ Matrix *feedforward_algo(NeuralNetwork *nn, double inputs[], size_t len)
     // with the same process, the results for the output layer
     // Computes output's outputs
     Matrix *output = matrix_dot_product(nn->hidden_outputWeights, hidden);
-    //matrix_apply_function_in_place(output, sigmoid);
-    //matrix_print(output);
-    //printf("\n");
-    //printf("Step 2\n");
     matrix_add_in_place(output, nn->output_biases);
-    //matrix_print(output);
-    //printf("\n");
-    //printf("Step 2 Done\n");
-
-    // Acvtivation
     matrix_apply_function_in_place(output, sigmoid);
 
     matrix_free(inputMatrix);
     matrix_free(hidden);
-
     return output;
 }
 
@@ -350,7 +331,7 @@ int train(size_t EPOCHS, double learning_rate)
     size_t trainingIndex[trainingNumber];
     for (size_t i = 0; i < trainingNumber; i++) { trainingIndex[i] = i; }
 
-    printf("Dataset loaded !\n");
+    printf("Dataset loading...\n");
     char beautiful[100];
     for (int i = 0; i < 99; i++) { beautiful[i] = '_'; }
     beautiful[99] = '\0';
@@ -385,11 +366,12 @@ int train(size_t EPOCHS, double learning_rate)
     }
 
     printf("100%%[%s]\n", beautiful);
+    printf("Training Complete !\n");
     
-    printf("\nTraining :\n");
+    printf("\nFirst Draft :\n");
     printf("----------------------------------------------------\n");
 
-    int TestNumber = 76;
+    int TestNumber = 10;
     double tests[TestNumber][784];
     size_t wantedO[TestNumber];
     for (int index = 1; index <= TestNumber; index++)
@@ -417,16 +399,14 @@ int train(size_t EPOCHS, double learning_rate)
         matrix_free(test1);
         sleep(1);
     }
-    printf("ACCURACY : %f%%\n", 
-            ((double)success / (double)TestNumber) * 100.0f);      
+    printf("----------------------------------------------------\n");
+    printf("ACCURACY : %f%%\n", ((double)success / (double)TestNumber) * 100.0f);      
         
-
     // Save the data of the neural network in a file
     FILE *fileptr = NULL;
     fileptr = fopen("Values.txt", "w");
     fprintf(fileptr, "%li\n%li\n%li\n", nn->inputNodes,
             nn->hiddenNodes, nn->outputNodes);
-    //fprintf(fileptr, "Input to hidden layer Weights :\n");
     for (size_t i = 0; i < nn->inputNodes; i++)
     {
         for (size_t j = 0; j < nn->hiddenNodes; j++)
@@ -434,17 +414,12 @@ int train(size_t EPOCHS, double learning_rate)
             double temp = matrix_get(nn->input_hiddenWeights, j, i);
             fprintf(fileptr, "%lf|", temp);
         }
-        //fprintf(fileptr, "\n");
     }
-
-    //fprintf(fileptr, "\nHidden layer biases :\n");
     for (size_t i = 0; i < nn->hidden_biases->row; i++)
     {
         double temp = matrix_get(nn->hidden_biases, i, 0);
         fprintf(fileptr, "%lf|", temp);
     }
-
-    //fprintf(fileptr, "\nHidden to output layer Weights :\n");
     for (size_t i = 0; i < nn->outputNodes; i++)
     {
         for (size_t j = 0; j < nn->hiddenNodes; j++)
@@ -452,22 +427,17 @@ int train(size_t EPOCHS, double learning_rate)
             double temp = matrix_get(nn->hidden_outputWeights, i, j);
             fprintf(fileptr, "%lf|", temp);
         }
-        //fprintf(fileptr, "\n");
     }
-    //fprintf(fileptr, "\nOutput layer biases :\n");
     for (size_t i = 0; i < nn->output_biases->row; i++)
     {
         double temp = matrix_get(nn->output_biases, i, 0);
         fprintf(fileptr, "%lf|", temp);
     }
-
-    //fprintf(fileptr, "\n");
     fclose(fileptr);
 
     // Frees malloced variables
     matrix_free(wantedOutputsMatrix);
     free_network(nn);
-
     SDL_Quit();
     return 0;
 }
