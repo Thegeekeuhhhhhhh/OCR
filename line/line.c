@@ -243,6 +243,7 @@ int main(int argc, char** argv) {
     }
 
     SDL_Surface *surf = load_image(argv[1]);
+    SDL_Surface *surf2 = load_image(argv[2]);
     struct my_image* img = init_image(surf);
 
     // Créer une instance de Line et ajouter des lignes (à titre d'exemple)
@@ -282,7 +283,7 @@ int main(int argc, char** argv) {
     int x2 = myLine.line[myLine.nblines-2].rho;
     int y2 = myLine.line[myLine.nblines-1].rho;
 
-    extractSudokuCells(surf, x1, y1, x2, y2);
+    extractSudokuCells(surf2, x1, y1, x2, y2);
 
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE); // Vert
 
@@ -314,6 +315,7 @@ int main(int argc, char** argv) {
     free(myLine.line);
     free(intersectionPoints);
     SDL_FreeSurface(surf);
+    SDL_FreeSurface(surf2);
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

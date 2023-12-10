@@ -147,6 +147,7 @@ void reco(const char* init_grid, char* final_grid){
     SDL_FreeSurface(surface);
 }
 
+/*
 int main(int argc, char** argv)
 {
     
@@ -155,3 +156,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+*/
