@@ -176,6 +176,7 @@ void reverseColors(SDL_Surface* surface) {
     }
 }
 
+/*
 int main(int argc, char** argv){
     if(argc != 5){
         err(1, "not good my friend");
@@ -197,4 +198,5 @@ int main(int argc, char** argv){
     
     return 0;
 }
+*/
 

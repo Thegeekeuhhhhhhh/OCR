@@ -14,16 +14,39 @@ int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
 
 
+void sh(uint8_t **matrice, int lignes, int colonnes) {
+    for (int i = 0; i < lignes; i++) {
+        for (int j = 0; j < colonnes; j++) {
+            printf("%4u ", matrice[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void printLines(struct Line* lineStruct) {
+    if (lineStruct == NULL || lineStruct->line == NULL || lineStruct->nblines <= 0) {
+        printf("Invalid Line structure or empty lines.\n");
+        return;
+    }
+
+    printf("Printing lines:\n");
+    for (int i = 0; i < lineStruct->nblines; i++) {
+        printf("Line %d: rho = %f, theta = %f\n", i + 1, lineStruct->line[i].rho, lineStruct->line[i].theta);
+    }
+}
+
 // Fonction de transformation de Hough
-struct Line houghTransform(Uint8** pixels, int width, int height) {
+struct Line houghTransform(Uint8** pixels, int width, int height, int threshold) {
     // Initialiser l'espace Hough
     int max_rho = (int) sqrt(width * width + height * height);
     int theta_count = 180;
     int *accumulator = (int *)calloc(max_rho * theta_count, sizeof(int));
+        
+    //sh(pixels, height, width);
 
     // Boucle sur les points de l'image
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
+    for (int x = 0; x < height; x++) {
+        for (int y = 0; y < width; y++) {
             if (pixels[x][y] > 0) {
                 // Boucle sur les valeurs de theta
                 for (int t = 0; t < theta_count; t++) {
@@ -42,7 +65,7 @@ struct Line houghTransform(Uint8** pixels, int width, int height) {
     newLine->line = NULL;
 
     // Identifier les maxima locaux dans l'espace Hough pour détecter les lignes
-    findLocalMaxima(newLine, accumulator, max_rho, theta_count, width);
+    findLocalMaxima(newLine, accumulator, max_rho, theta_count, width/threshold);
 
     // Libérer la mémoire
     free(accumulator);
@@ -51,9 +74,8 @@ struct Line houghTransform(Uint8** pixels, int width, int height) {
 
 // Fonction pour identifier les maxima locaux dans l'espace Hough
 void findLocalMaxima(struct Line* newLine, int *accumulator
-                , int max_rho, int theta_count, int width) {
-    
-    int threshold = width/2; // Choisir un seuil approprié
+                , int max_rho, int theta_count, int threshold) {
+       
     for (int r = 0; r < max_rho; r++) {
         for (int t = 0; t < theta_count; t++) {
             int votes = accumulator[r * theta_count + t];
@@ -79,9 +101,8 @@ void findLocalMaxima(struct Line* newLine, int *accumulator
                     }
                 }
                 if (is_max) {
-                    double theta = t * M_PI / 180.0;
+                    double theta = t * M_PI / 180.0;  
                     addLine(newLine, r, theta);
-                    
                 }
             }
         }
@@ -110,10 +131,10 @@ void calculateIntersection(struct Line lines, struct Point* intersectionPoints) 
             double rho2 = lines.line[j].rho;
             double theta2 = lines.line[j].theta;
 
-            // Check if lines are nearly parallel
-            if (fabs(theta1 - theta2) > THRESHOLD) {
-                    intersectionPoints[i].x = rho1;
-                    intersectionPoints[i].y = rho2;
+            // Check if lines are nearly perpendicular
+            if (fabs(fabs(theta1 - theta2) - M_PI / 2.0) < THRESHOLD) {
+                intersectionPoints[i].x = rho1;
+                intersectionPoints[i].y = rho2;
             }
         }
     }
@@ -155,10 +176,16 @@ void extractSudokuCells(SDL_Surface* surface, int x1, int y1, int x2, int y2) {
 
             // Enregistrer la cellule si elle a au moins le seuil de pixels non noirs
             if (nonBlackPixels >= nonBlackThreshold) {
-                char filename[50];
-                sprintf(filename, "output/%d_%d.png", row, col);
+                // Redimensionner la cellule en 28x28
+                SDL_Surface* resizedSurface = SDL_CreateRGBSurface(0, 28, 28, 32, 0, 0, 0, 0);
+                resizeImage(cellSurface, resizedSurface);
 
-                SDL_SaveBMP(cellSurface, filename);
+                char filename[50];
+                sprintf(filename, "output/%d_%d.png", col, row);
+
+                SDL_SaveBMP(resizedSurface, filename);
+
+                SDL_FreeSurface(resizedSurface);
             }
 
             SDL_FreeSurface(cellSurface);
@@ -217,18 +244,36 @@ int initSDL() {
 
 
 int main(int argc, char** argv) {
+    
+    int count = 0;
+    printf("%i\n", count++);
 
-    if (argc < 2 || argc > 3) {
-        fprintf(stderr, "Usage: %s imagefile (optional param \"-cut\")\n", argv[0]);
+    if (argc != 4) {
+        fprintf(stderr, "Usage: %s imagefile image_tocut threshold", argv[0]);
         exit(1);
     }
 
     SDL_Surface *surf = load_image(argv[1]);
+    SDL_Surface *surf2 = load_image(argv[2]);
+    
+ 
     struct my_image* img = init_image(surf);
 
+    int threshold = atoi(argv[3]); 
     // Créer une instance de Line et ajouter des lignes (à titre d'exemple)
-    struct Line myLine = houghTransform(img->pixels, img->w, img->h);
-    
+    struct Line myLine = houghTransform(img->pixels, img->w, img->h, threshold);
+
+    printLines(&myLine);
+
+    struct Point* intersectionPoints = (struct Point*)malloc(myLine.nblines * (myLine.nblines - 1) / 2 * sizeof(struct Point));
+
+    calculateIntersection(myLine, intersectionPoints);
+
+        // Using the calculated intersection points
+    for (int i = 0; i < myLine.nblines * (myLine.nblines - 1) / 2; i++) {
+        printf("Intersection %d: (%d, %d)\n", i + 1, intersectionPoints[i].x, intersectionPoints[i].y);
+    }
+
     // Fixe les tailles de la fenêtre 
     SCREEN_WIDTH = surf->w;
     SCREEN_HEIGHT = surf->h;
@@ -237,7 +282,8 @@ int main(int argc, char** argv) {
     if (!initSDL()) {
         return -1;
     }
-
+    
+    
     // Dessiner les lignes sur la surface
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
     
@@ -246,36 +292,36 @@ int main(int argc, char** argv) {
     drawLines(img,&myLine);
     
     printf("%i\n", myLine.nblines);
+    
 
-    struct Point* intersectionPoints = (struct Point*)malloc(myLine.nblines * (myLine.nblines - 1) / 2 * sizeof(struct Point));
-
-    calculateIntersection(myLine, intersectionPoints);
-
+    /*
     for (int i = 0; i < myLine.nblines * (myLine.nblines - 1) / 2; i++) {
         SDL_RenderDrawPoint(renderer, intersectionPoints[i].x, intersectionPoints[i].y);
     }
  
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE); // Vert
-
+    */
+    
     int x1 = myLine.line[0].rho;
     int y1 = myLine.line[1].rho;
     int x2 = myLine.line[myLine.nblines-2].rho;
     int y2 = myLine.line[myLine.nblines-1].rho;
         
-    extractSudokuCells(surf, x1, y1, x2, y2);
-
+    extractSudokuCells(surf2, x1, y1, x2, y2);
+    
+    /*
     // Dessiner chaque point avec une taille de 3x3
     for (int i = 0; i < myLine.nblines * (myLine.nblines - 1) / 2; i++) {
         int x = intersectionPoints[i].x;
         int y = intersectionPoints[i].y;
 
-        // Dessiner un carré 3x3 autour du point central (x, y)
         for (int offsetX = -1; offsetX <= 1; offsetX++) {
             for (int offsetY = -1; offsetY <= 1; offsetY++) {
                 SDL_RenderDrawPoint(renderer, x + offsetX, y + offsetY);
             }
         }
     }
+    */
 
     SDL_RenderPresent(renderer);
 
@@ -292,7 +338,9 @@ int main(int argc, char** argv) {
     
     // Nettoyage et fermeture de SDL
     free(myLine.line);
+    free(intersectionPoints);
     SDL_FreeSurface(surf);
+    SDL_FreeSurface(surf2);
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

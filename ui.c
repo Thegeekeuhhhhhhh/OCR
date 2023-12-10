@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "Reco_Network/neuralnetwork.h"
+#include "./Reco_Network/neuralnetwork.h"
+#include "./line/line.h"
+#include "./pretreatment/pretreatment.h"
+#include "./pretreatment/reconstruction.c"
 #include <string.h>
 
 // Structure of the graphical user interface.
@@ -45,25 +48,45 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
 {
     struct App *app = user_data;
     long i = 0, y = 1, c = 0;
-    char *param1, *param2, *param3;
+    char *param1 = malloc(sizeof(char) * 128);
+    char *param2 = malloc(sizeof(char) * 128);
+    char *param3 = malloc(sizeof(char) * 128);
     while (gtk_entry_get_text(app->ui.param_entry)[i]!=NULL)
-        if (gtk_entry_get_text(app->ui.param_entry)[i] == ' '){
+    {
+        if (gtk_entry_get_text(app->ui.param_entry)[i] == ' ')
+        {
             if (y == 1)
-            {y ++; *(param1+c) = 0;c=0;}
+            {
+                y ++; *(param1+c) = 0;
+                c=0;
+            }
             if (y == 2)
-            {y ++; *(param2+c) = 0;c=0;}
+            {
+                y ++; *(param2+c) = 0;
+                c=0;
+            }
             if (y == 3)
-            {y ++; *(param3+c) = 0;c=0;}
+            {
+                y ++; *(param3+c) = 0;
+                c=0;
+            }
         }
         else {
             if (y == 1)
-            {*(param1+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;}
+            {
+                *(param1+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;
+            }
             if (y == 2)
-            {*(param2+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;}
+            {
+                *(param2+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;
+            }
             if (y == 3)
-            {*(param3+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;}
+            {
+                *(param3+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;
+            }
         }
         i++;
+    }
 
     char *args[] = {"./pretreatment/pretreatment", param1, param2};
     //add first preprocess function
@@ -77,6 +100,9 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.rotation_button), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.ai_button), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.solver_button), FALSE);
+    free(param1);
+    free(param2);
+    free(param3);
 }
 
 void on_rotate(GtkButton *rotation_button, gpointer user_data)
@@ -111,7 +137,7 @@ void on_ai(GtkButton *ai_button, gpointer user_data)
     
     DIR *d;
     struct dirent *dir;
-    d = opendir(".line/output");
+    d = opendir("./line/output");
     if (d)
     {
         while ((dir = readdir(d)) != NULL)
@@ -174,7 +200,7 @@ int main (int argc, char *argv[])
     //Loads the UI description.
     //(Exits if an error occurs.)
     GError* error = NULL;
-    if (gtk_builder_add_from_file(builder, "app.glade", &error) == 0)
+    if (gtk_builder_add_from_file(builder, "ui.glade", &error) == 0)
     {
         g_printerr("Error loading file: %s\n", error->message);
         g_clear_error(&error);

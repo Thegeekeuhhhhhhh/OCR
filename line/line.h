@@ -21,10 +21,11 @@ struct Point{
     int x;
     int y;
 }; 
-struct Line houghTransform(Uint8** pixels, int width, int height);
+
+struct Line houghTransform(Uint8** pixels, int width, int height, int threshold);
 
 void findLocalMaxima(struct Line* newLine, int *accumulator
-        , int max_rho, int theta_count, int width);
+        , int max_rho, int theta_count, int threshold);
 
 void addLine(struct Line* myLine, double rho, double theta);
 
