@@ -137,8 +137,9 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
     app->filename = "sauv.bmp";
     //free(app->ui.image_display);
 
-    gtk_image_set_from_file(app->ui.image_display, app->filename);
-    //app->ui.image_display = GTK_IMAGE(gtk_image_new_from_file("sauv.bmp"));
+    //gtk_image_set_from_file(app->ui.image_display, app->filename);
+    //gtk_image_clear(app->ui.image_display);
+    app->ui.image_display = GTK_IMAGE(gtk_image_new_from_file("sauv.bmp"));
 
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.segmentation_button), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.rotation_button), TRUE);
