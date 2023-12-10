@@ -16,4 +16,5 @@ ui.o: ui.c Reco_Network/matrix.c Reco_Network/train.c Reco_Network/load.c Reco_N
 clean:
 	rm -f *.o QuoicOuCR *.d
 	rm -f *.o ui *.d
+	rm -f *.bmp
 

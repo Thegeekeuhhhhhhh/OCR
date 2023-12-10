@@ -11,8 +11,8 @@
 // Structure of the graphical user interface.
 typedef struct UserInterface
 {
-    GtkWindow* window;                         // Main window
-    GtkImage* image_display;                   // Image area
+    GtkWindow* window; // Main window
+    GtkImage* image_display; // Image area
     GtkFileChooserButton* file_chooser_button;
     GtkButton* preprocessing_button;
     GtkButton* rotation_button;
@@ -44,65 +44,108 @@ void on_set(GtkFileChooserButton *file_chooser_button, gpointer user_data)
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.ocr_button), TRUE);
 }
 
+SDL_Surface* GtkImageToSDLSurface(GtkImage* gtkImage)
+{
+    // Get the GdkPixbuf from GtkImage
+    GdkPixbuf* pixbuf = gtk_image_get_pixbuf(gtkImage);
+    if (!pixbuf)
+    {
+        return NULL;
+    }
+
+    // Get information about the GdkPixbuf
+    int width = gdk_pixbuf_get_width(pixbuf);
+    int height = gdk_pixbuf_get_height(pixbuf);
+    guchar* pixels = gdk_pixbuf_get_pixels(pixbuf);
+    int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+    int n_channels = gdk_pixbuf_get_n_channels(pixbuf);
+
+    // Create an SDL_Surface
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(
+            pixels, width, height, n_channels * 8, rowstride, 0xff0000, 0x00ff00, 0x0000ff, 0);
+
+    // Return the created SDL_Surface
+    return surface;
+}
+
 void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
 {
     struct App *app = user_data;
     long i = 0, y = 1, c = 0;
-    char *param1 = malloc(sizeof(char) * 128);
-    char *param2 = malloc(sizeof(char) * 128);
-    char *param3 = malloc(sizeof(char) * 128);
-    while (gtk_entry_get_text(app->ui.param_entry)[i]!=NULL)
+    char param1[100];
+    char param2[100];
+    char param3[100];
+    const gchar *test = gtk_entry_get_text(app->ui.param_entry);
+    while (test[i] != NULL)
     {
-        if (gtk_entry_get_text(app->ui.param_entry)[i] == ' ')
+        if (test[i] == ' ')
         {
             if (y == 1)
             {
-                y ++; *(param1+c) = 0;
+                y ++;
+                param1[c] = '\0';
                 c=0;
             }
             if (y == 2)
             {
-                y ++; *(param2+c) = 0;
+                y ++; 
+                param2[c] = '\0';
                 c=0;
             }
             if (y == 3)
             {
-                y ++; *(param3+c) = 0;
+                y ++; 
+                param3[c] = '\0';
                 c=0;
             }
         }
-        else {
+        else 
+        {
             if (y == 1)
             {
-                *(param1+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;
+                param1[c] = test[i];
+                c++;
             }
             if (y == 2)
             {
-                *(param2+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;
+                param2[c] = test[i];
+                c++;
             }
             if (y == 3)
             {
-                *(param3+c) = gtk_entry_get_text(app->ui.param_entry)[i];c++;
+                param3[c] = test[i];
+                c++;
             }
         }
         i++;
     }
 
-    char *args[] = {"./pretreatment/pretreatment", param1, param2};
-    //add first preprocess function
-    execvp("./pretreatment/pretreatment", args);
+    SDL_Surface* one = GtkImageToSDLSurface(app->ui.image_display);
+    SDL_Surface* two = SDL_CreateRGBSurfaceWithFormat(0, one->w, one->h, 32, SDL_PIXELFORMAT_RGBA32);
 
-    app->filename = "process.png";
+    convertToGrayscale(one,two);
+    dilateImage(two, one, atof(param1));
+    applySauvolaFilter(one,two, atoi(param2), atof(param3));
+
+    applySobelFilter(two,one);
+    SDL_SaveBMP(one, "sob.bmp");
+    SDL_SaveBMP(two, "sauv.bmp");
+
+    SDL_FreeSurface(one);
+    SDL_FreeSurface(two);
+
+    app->filename = "sauv.bmp";
+    //free(app->ui.image_display);
 
     gtk_image_set_from_file(app->ui.image_display, app->filename);
+    //app->ui.image_display = GTK_IMAGE(gtk_image_new_from_file("sauv.bmp"));
 
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.segmentation_button), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.rotation_button), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.ai_button), FALSE);
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.solver_button), FALSE);
-    free(param1);
-    free(param2);
-    free(param3);
+
+    printf("END OF PREPROCESS\n");
 }
 
 void on_rotate(GtkButton *rotation_button, gpointer user_data)
@@ -134,7 +177,7 @@ void on_ai(GtkButton *ai_button, gpointer user_data)
     struct App *app = user_data;
     // fonction pour les parametre: gtk_entry_get_text(app->ui.param_entry)
     //add character recognition function
-    
+
     DIR *d;
     struct dirent *dir;
     d = opendir("./line/output");
@@ -216,17 +259,17 @@ int main (int argc, char *argv[])
     GtkButton* preprocessing_button = GTK_BUTTON(gtk_builder_get_object
             (builder, "preprocessing_button"));
     GtkButton* rotation_button = GTK_BUTTON(gtk_builder_get_object
-            (builder, "rotation_button"));;
+            (builder, "rotation_button"));
     GtkButton* segmentation_button = GTK_BUTTON(gtk_builder_get_object
-            (builder, "segmentation_button"));;
+            (builder, "segmentation_button"));
     GtkButton* ai_button = GTK_BUTTON(gtk_builder_get_object
-            (builder, "ai_button"));;
+            (builder, "ai_button"));
     GtkButton* solver_button = GTK_BUTTON(gtk_builder_get_object
-            (builder, "solver_button"));;
+            (builder, "solver_button"));
     GtkButton* ocr_button = GTK_BUTTON(gtk_builder_get_object
-            (builder, "ocr_button"));;
+            (builder, "ocr_button"));
     GtkEntry* param_entry = GTK_ENTRY(gtk_builder_get_object
-            (builder, "param_entry"));;
+            (builder, "param_entry"));
 
     char filename[256];
     //Creates the "App" structure.
@@ -251,15 +294,12 @@ int main (int argc, char *argv[])
     //Connects event handlers.
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(file_chooser_button, "file-set", G_CALLBACK(on_set), &app);
-    g_signal_connect(preprocessing_button, "clicked", G_CALLBACK(on_preprocess),
-            &app);
+    g_signal_connect(preprocessing_button, "clicked", G_CALLBACK(on_preprocess), &app);
     g_signal_connect(rotation_button, "clicked", G_CALLBACK(on_rotate), &app);
-    g_signal_connect(segmentation_button, "clicked",
-            G_CALLBACK(on_segmentation), &app);
+    g_signal_connect(segmentation_button, "clicked", G_CALLBACK(on_segmentation), &app);
     g_signal_connect(ai_button, "clicked", G_CALLBACK(on_ai), &app);
     g_signal_connect(solver_button, "clicked", G_CALLBACK(on_solve), &app);
-    g_signal_connect(ocr_button, "clicked", G_CALLBACK(on_ocr),
-            &app);
+    g_signal_connect(ocr_button, "clicked", G_CALLBACK(on_ocr), &app);
 
     // Runs the main loop.
     gtk_main();
