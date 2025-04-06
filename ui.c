@@ -75,50 +75,43 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
     char param1[100];
     char param2[100];
     char param3[100];
+    for (int i = 0; i < 100; i++)
+    {
+        param1[i] = 0;
+        param2[i] = 0;
+        param3[i] = 0;
+    }
+    param1[0] = '0';
+    param2[0] = '0';
+    param3[0] = '0';
     const gchar *test = gtk_entry_get_text(app->ui.param_entry);
     while (test[i] != NULL)
     {
         if (test[i] == ' ')
         {
-            if (y == 1)
-            {
-                y ++;
-                param1[c] = '\0';
-                c=0;
-            }
-            if (y == 2)
-            {
-                y ++; 
-                param2[c] = '\0';
-                c=0;
-            }
-            if (y == 3)
-            {
-                y ++; 
-                param3[c] = '\0';
-                c=0;
-            }
+            y++;
+            c = 0;
         }
         else 
         {
             if (y == 1)
             {
                 param1[c] = test[i];
-                c++;
             }
             if (y == 2)
             {
                 param2[c] = test[i];
-                c++;
             }
             if (y == 3)
             {
                 param3[c] = test[i];
-                c++;
             }
+            c++;
         }
         i++;
     }
+    printf("\n");
+    printf("%s, %s, %s\n", param1, param2, param3);
 
     SDL_Surface* one = GtkImageToSDLSurface(app->ui.image_display);
     SDL_Surface* two = SDL_CreateRGBSurfaceWithFormat(0, one->w, one->h, 32, SDL_PIXELFORMAT_RGBA32);
@@ -139,7 +132,9 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
 
     //gtk_image_set_from_file(app->ui.image_display, app->filename);
     //gtk_image_clear(app->ui.image_display);
-    app->ui.image_display = GTK_IMAGE(gtk_image_new_from_file("sauv.bmp"));
+    //app->ui.image_display = GTK_IMAGE(gtk_image_new_from_file("sauv.bmp"));
+    //GtkImage *image = GTK_IMAGE(app->ui.image_display);
+    //gtk_image_set_from_file(GTK_IMAGE(image), app->filename);
 
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.segmentation_button), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.rotation_button), TRUE);
