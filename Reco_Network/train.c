@@ -1,7 +1,6 @@
 #include "train.h"
 #include "matrix.h"
 #include <unistd.h>
-#include <SDL.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
