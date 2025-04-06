@@ -2,9 +2,9 @@
 
 CC = gcc
 CPPFLAGS= -MMD -D_XOPEN_SOURCE=500
-CFLAGS= -Wall -Wextra -std=c99 -O2 -O3 -lSDL2 -lSDL2_image `pkg-config --cflags sdl2 SDL2_image` `pkg-config --cflags gtk+-3.0`
-LDFLAGS= -lm `pkg-config --libs sdl2 SDL2_image`
-LDLIBS= -lm `pkg-config --libs sdl2 SDL2_image` `pkg-config --libs gtk+-3.0`
+CFLAGS= -Wall -Wextra -std=c99 -O2 -O3 `pkg-config --cflags gtk+-3.0`
+LDFLAGS= -lm -I/usr/include/SDL2
+LDLIBS= -lm `pkg-config --libs gtk+-3.0` -I/usr/include/SDL2
 
 all: ui.o
 	mv ui.o QuoicOuCR
