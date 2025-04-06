@@ -9,8 +9,8 @@
 - To solve a sudoku grid based only on a picture
 
 # Requirements:
-- SDL2
-### IMPORTANT : You will need the file found at https://raw.githubusercontent.com/davidsiaw/SDL2_image/refs/heads/master/SDL_image.h
+#### SDL2
+- IMPORTANT : You will need the file found at https://raw.githubusercontent.com/davidsiaw/SDL2_image/refs/heads/master/SDL_image.h
 ```shell
 # Commands given on SDL2 installation guide
 git clone https://github.com/libsdl-org/SDL.git -b SDL2
@@ -25,6 +25,17 @@ sudo make install
 sudo wget -O /usr https://raw.githubusercontent.com/davidsiaw/SDL2_image/refs/heads/master/SDL_image.h
 ```
 
-- GTK3+
+#### GTK3+
 - To install GTK3+, you can refer to the following : https://github.com/GNOME/gtk
 Everything is explained well and there is many prerequesites
+- Even simpler, it is possible to install it with your package manager
+
+#### To compile the project, you can use
+```shell
+make
+```
+
+### Then to use it :
+```shell
+./ocr
+```
