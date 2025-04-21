@@ -124,17 +124,36 @@ void on_preprocess(GtkButton *preprocessing_button, gpointer user_data)
     SDL_SaveBMP(one, "sob.bmp");
     SDL_SaveBMP(two, "sauv.bmp");
 
-    SDL_FreeSurface(one);
-    SDL_FreeSurface(two);
+
+    gtk_image_clear(app->ui.image_display);  // Optional, ensures the image is cleared
+
+    // Update the GtkImage widget with the new file
+    gtk_image_set_from_file(app->ui.image_display, app->filename);
+
+    // Ensure the image is refreshed
+    gtk_widget_queue_draw(GTK_WIDGET(app->ui.image_display));
+
+    /*
+
+    //app->filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER
+    //        (file_chooser_button));
+    //gtk_image_set_from_file(app->ui.image_display, app->filename);
+
+    //SDL_FreeSurface(one);
+    //SDL_FreeSurface(two);
 
     app->filename = "sauv.bmp";
     //free(app->ui.image_display);
+    gtk_image_set_from_file(app->ui.image_display, app->filename);
 
     //gtk_image_set_from_file(app->ui.image_display, app->filename);
     //gtk_image_clear(app->ui.image_display);
     //app->ui.image_display = GTK_IMAGE(gtk_image_new_from_file("sauv.bmp"));
     //GtkImage *image = GTK_IMAGE(app->ui.image_display);
     //gtk_image_set_from_file(GTK_IMAGE(image), app->filename);
+    */
+
+
 
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.segmentation_button), TRUE);
     gtk_widget_set_sensitive(GTK_WIDGET(app->ui.rotation_button), TRUE);
